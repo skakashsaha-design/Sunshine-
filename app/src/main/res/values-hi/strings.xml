@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">होम</string>
+    <string name="nav_forecast">पूर्वानुमान</string>
+    <string name="nav_map">मानचित्र</string>
+    <string name="nav_alerts">चेतावनी</string>
+    <string name="nav_more">अधिक</string>
+    <string name="status_online">ऑनलाइन</string>
+    <string name="status_offline">ऑफलाइन</string>
+    <string name="feels_like">महसूस %1$s</string>
+    <string name="todays_summary">आज का सारांश</string>
+    <string name="daily_advisor">दैनिक मौसम और सुरक्षा सलाह</string>
+    <string name="hourly_outlook">प्रति घंटा पूर्वानुमान</string>
+    <string name="rain_probability">बारिश की संभावना</string>
+    <string name="air_quality">वायु गुणवत्ता</string>
+    <string name="wind">हवा</string>
+    <string name="sunrise_sunset">सूर्योदय और सूर्यास्त</string>
+    <string name="humidity">नमी</string>
+    <string name="pressure">दबाव</string>
+    <string name="visibility">दृश्यता</string>
+    <string name="uv_index">यूवी इंडेक्स</string>
+    <string name="title_aqi">वायु गुणवत्ता केंद्र</string>
+    <string name="title_astronomy">खगोल विज्ञान</string>
+    <string name="title_disasters">वैश्विक आपदा केंद्र</string>
+    <string name="title_locations">सहेजे गए स्थान</string>
+    <string name="title_providers">प्रदाता तुलना</string>
+    <string name="title_settings">सेटिंग्स</string>
+    <string name="title_about">SkyPulse के बारे में</string>
+</resources>

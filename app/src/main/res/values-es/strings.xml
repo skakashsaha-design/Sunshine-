@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">Inicio</string>
+    <string name="nav_forecast">Pronóstico</string>
+    <string name="nav_map">Mapa</string>
+    <string name="nav_alerts">Alertas</string>
+    <string name="nav_more">Más</string>
+    <string name="status_online">EN LÍNEA</string>
+    <string name="status_offline">SIN CONEXIÓN</string>
+    <string name="feels_like">Sensación %1$s</string>
+    <string name="todays_summary">Resumen de hoy</string>
+    <string name="daily_advisor">Asesor Diario de Clima y Seguridad</string>
+    <string name="hourly_outlook">Pronóstico por hora</string>
+    <string name="rain_probability">Probabilidad de lluvia</string>
+    <string name="air_quality">Calidad del aire</string>
+    <string name="wind">Viento</string>
+    <string name="sunrise_sunset">Amanecer y atardecer</string>
+    <string name="humidity">Humedad</string>
+    <string name="pressure">Presión</string>
+    <string name="visibility">Visibilidad</string>
+    <string name="uv_index">Índice UV</string>
+    <string name="title_aqi">Centro de Calidad del Aire</string>
+    <string name="title_astronomy">Astronomía</string>
+    <string name="title_disasters">Centro Global de Desastres</string>
+    <string name="title_locations">Ubicaciones Guardadas</string>
+    <string name="title_providers">Comparación de Proveedores</string>
+    <string name="title_settings">Ajustes</string>
+    <string name="title_about">Acerca de SkyPulse</string>
+</resources>

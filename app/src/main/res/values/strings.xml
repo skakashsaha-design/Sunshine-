@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SkyPulse</string>
+    <string name="wallpaper_title">SkyPulse Live Sky</string>
+    <string name="wallpaper_description">Dynamic live weather sky with day/night, rain, snow, and storm visuals.</string>
+
+    <!-- Widgets -->
+    <string name="widget_current_label">SkyPulse Current Weather</string>
+    <string name="widget_compact_label">SkyPulse Compact Forecast</string>
+    <string name="widget_hourly_label">SkyPulse Hourly Forecast</string>
+    <string name="widget_aqi_label">SkyPulse Air Quality</string>
+    <string name="widget_alert_label">SkyPulse Weather Alerts</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_forecast">Forecast</string>
+    <string name="nav_map">Map</string>
+    <string name="nav_alerts">Alerts</string>
+    <string name="nav_more">More</string>
+
+    <!-- Status & Data Origins -->
+    <string name="status_online">ONLINE</string>
+    <string name="status_offline">OFFLINE</string>
+    <string name="status_last_updated">Updated %1$s</string>
+    <string name="status_fallback_used">Fallback active: %1$s</string>
+    <string name="origin_observed">Observed</string>
+    <string name="origin_forecast">Forecast</string>
+    <string name="origin_calculated">App-Calculated</string>
+    <string name="origin_model">Model Estimate</string>
+    <string name="origin_official_bmd">OFFICIAL BMD</string>
+    <string name="origin_global_official">GLOBAL OFFICIAL SOURCE</string>
+
+    <!-- Home Screen -->
+    <string name="feels_like">Feels like %1$s</string>
+    <string name="high_low">H:%1$s  L:%2$s</string>
+    <string name="todays_summary">Today\'s Summary</string>
+    <string name="daily_advisor">Daily Safety &amp; Weather Advisor</string>
+    <string name="hourly_outlook">Hourly Outlook</string>
+    <string name="rain_probability">Rain Probability</string>
+    <string name="air_quality">Air Quality</string>
+    <string name="wind">Wind</string>
+    <string name="sunrise_sunset">Sunrise &amp; Sunset</string>
+    <string name="detailed_metrics">Detailed Telemetry</string>
+    <string name="view_all">View all</string>
+    <string name="refresh">Refresh</string>
+    <string name="use_gps">Use GPS</string>
+
+    <!-- Metrics -->
+    <string name="humidity">Humidity</string>
+    <string name="dew_point">Dew Point</string>
+    <string name="wet_bulb">Wet-Bulb Temp</string>
+    <string name="pressure">Pressure</string>
+    <string name="visibility">Visibility</string>
+    <string name="uv_index">UV Index</string>
+    <string name="cloud_cover">Cloud Cover</string>
+    <string name="precipitation">Precipitation</string>
+    <string name="wind_gusts">Wind Gusts</string>
+    <string name="heat_index">Heat Index</string>
+    <string name="wind_chill">Wind Chill</string>
+    <string name="solar_radiation">Solar Radiation</string>
+    <string name="freezing_level">Freezing Level</string>
+    <string name="soil_temp">Soil Temperature</string>
+    <string name="soil_moisture">Soil Moisture</string>
+    <string name="unsupported_value">N/A</string>
+
+    <!-- More Hub & Screens -->
+    <string name="title_aqi">Air Quality Center</string>
+    <string name="title_astronomy">Astronomy &amp; Sky</string>
+    <string name="title_disasters">Global Disaster Center</string>
+    <string name="title_locations">Saved Locations</string>
+    <string name="title_providers">Provider Comparison</string>
+    <string name="title_settings">Settings</string>
+    <string name="title_about">About SkyPulse</string>
+    <string name="title_bmd">Bangladesh BMD Companion</string>
+    <string name="title_ambient">Ambient Weather Sounds</string>
+    <string name="title_wallpaper">Live Weather Background</string>
+
+    <!-- About -->
+    <string name="about_developer_name">Arko Saha</string>
+    <string name="about_developer_role">Bangladesh Meteorological &amp; Android Developer</string>
+    <string name="about_developer_email">skakashsaha@gmail.com</string>
+
+    <!-- Notifications -->
+    <string name="channel_daily_name">Daily Weather Summary</string>
+    <string name="channel_alerts_name">Severe Weather &amp; BMD Alerts</string>
+    <string name="channel_rain_name">Rain &amp; Storm Incoming</string>
+    <string name="channel_aqi_name">Air Quality Advisories</string>
+    <string name="channel_disaster_name">Global Disasters &amp; Earthquakes</string>
+</resources>

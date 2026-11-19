@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_home">ホーム</string>
+    <string name="nav_forecast">予報</string>
+    <string name="nav_map">マップ</string>
+    <string name="nav_alerts">警報</string>
+    <string name="nav_more">その他</string>
+    <string name="status_online">オンライン</string>
+    <string name="status_offline">オフライン</string>
+    <string name="feels_like">体感 %1$s</string>
+    <string name="todays_summary">今日の天気まとめ</string>
+    <string name="daily_advisor">毎日の天気・安全アドバイザー</string>
+    <string name="hourly_outlook">時間別予報</string>
+    <string name="rain_probability">降水確率</string>
+    <string name="air_quality">大気質 (AQI)</string>
+    <string name="wind">風</string>
+    <string name="sunrise_sunset">日の出・日の入り</string>
+    <string name="humidity">湿度</string>
+    <string name="pressure">気圧</string>
+    <string name="visibility">視程</string>
+    <string name="uv_index">UV指数</string>
+    <string name="title_aqi">大気質センター</string>
+    <string name="title_astronomy">天文・星空</string>
+    <string name="title_disasters">世界の災害情報</string>
+    <string name="title_locations">保存した場所</string>
+    <string name="title_providers">プロバイダー比較</string>
+    <string name="title_settings">設定</string>
+    <string name="title_about">SkyPulseについて</string>
+</resources>

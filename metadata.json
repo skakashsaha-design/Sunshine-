@@ -1,0 +1,6 @@
+{
+  "name": "SkyPulse",
+  "description": "Multi-provider weather intelligence, interactive radar, air quality, astronomy, Bangladesh BMD warnings, and global disaster monitor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
