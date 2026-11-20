@@ -275,4 +275,156 @@ object MeteorologyCalculator {
         }
         return advice
     }
+
+    fun buildTodayAiAnalysis(
+        current: CurrentWeather,
+        hourly: List<HourlyForecast>,
+        daily: List<DailyForecast>,
+        aqi: AirQualityData?,
+        unit: TemperatureUnit,
+        aiEnhancedSummary: String? = null
+    ): TodayAiAnalysis {
+        val insights = buildInsights(current, hourly, emptyList())
+        val todayHours = hourly.take(24)
+
+        val thermalScore = when {
+            current.feelsLikeC in 18.0..27.0 -> 94
+            current.feelsLikeC in 14.0..31.0 -> 78
+            current.feelsLikeC in 8.0..35.0 -> 58
+            else -> 32
+        }
+        val maxRainProb = todayHours.mapNotNull { it.precipitationProbabilityPercent }.maxOrNull() ?: 0
+        val rainScore = (100 - maxRainProb).coerceIn(10, 98)
+        val peakGust = todayHours.mapNotNull { it.windGustKmh ?: it.windSpeedKmh }.maxOrNull() ?: current.windSpeedKmh ?: 8.0
+        val windScore = (100 - (peakGust * 1.4).roundToInt()).coerceIn(15, 98)
+        val aqiVal = aqi?.usAqi ?: 50
+        val airScore = (100 - (aqiVal / 3)).coerceIn(10, 98)
+
+        val overallScore = ((thermalScore * 0.30) + (rainScore * 0.30) + (airScore * 0.25) + (windScore * 0.15)).roundToInt().coerceIn(10, 99)
+
+        val phases = listOf(
+            summarizePhase("Morning", "06:00–11:59", todayHours, 6..11, unit),
+            summarizePhase("Afternoon", "12:00–16:59", todayHours, 12..16, unit),
+            summarizePhase("Evening", "17:00–20:59", todayHours, 17..20, unit),
+            summarizePhase("Night", "21:00–05:59", todayHours, listOf(21, 22, 23, 0, 1, 2, 3, 4, 5).toSet(), unit)
+        )
+
+        val triggers = mutableListOf<String>()
+        val rainStart = todayHours.firstOrNull { (it.precipitationProbabilityPercent ?: 0) >= 50 || (it.precipitationMm ?: 0.0) >= 0.4 }
+        if (rainStart != null) {
+            triggers += "Rain window starts around ${rainStart.isoTime.substringAfter("T", "").take(5)} (${rainStart.precipitationProbabilityPercent ?: "--"}%)"
+        } else {
+            triggers += "Dry pattern over the next 24h"
+        }
+        val warmestHour = todayHours.maxByOrNull { it.temperatureC }
+        if (warmestHour != null) {
+            triggers += "Peak warmth ${GeoUtils.formatTemperature(warmestHour.temperatureC, unit)} around ${warmestHour.isoTime.substringAfter("T", "").take(5)}"
+        }
+        val gustiestHour = todayHours.maxByOrNull { it.windGustKmh ?: it.windSpeedKmh ?: 0.0 }
+        if (gustiestHour != null) {
+            val g = gustiestHour.windGustKmh ?: gustiestHour.windSpeedKmh ?: 0.0
+            if (g >= 25.0) {
+                triggers += "Strongest gusts (${g.roundToInt()} km/h) at ${gustiestHour.isoTime.substringAfter("T", "").take(5)}"
+            }
+        }
+        aqi?.bestOutdoorWindow?.let {
+            triggers += "Cleanest air window: ${it.timeRange} (AQI ${it.avgAqi})"
+        }
+
+        val wardrobeTips = mutableListOf<String>()
+        if (maxRainProb >= 45 || current.condition == WeatherCondition.RAIN || current.condition == WeatherCondition.DRIZZLE) {
+            wardrobeTips += "Carry compact umbrella or waterproof shell; allow extra commute braking distance."
+        }
+        if (current.feelsLikeC >= 30.0) {
+            wardrobeTips += "Breathable cotton/linen layers & electrolyte hydration recommended."
+        } else if (current.temperatureC <= 16.0) {
+            wardrobeTips += "Wear a wind-resistant mid-layer, especially after sunset."
+        }
+        if ((current.uvIndex ?: 0.0) >= 5.5 || (daily.firstOrNull()?.uvIndexMax ?: 0.0) >= 6.0) {
+            wardrobeTips += "Apply SPF 30+ sunscreen & UV sunglasses during midday hours."
+        }
+        if (aqiVal >= 120) {
+            wardrobeTips += "High particulate load (AQI $aqiVal): use N95 mask for outdoor travel."
+        }
+        if (wardrobeTips.isEmpty()) {
+            wardrobeTips += "Light comfortable attire suits today's mild atmospheric profile."
+        }
+
+        val capeNote = current.capeJoulesKg?.let { "CAPE ${it.roundToInt()} J/kg" } ?: "CAPE N/A"
+        val wetBulbNote = current.wetBulbTempC?.let { "Wet-bulb ${GeoUtils.formatTemperature(it, unit)}" } ?: ""
+        val atmosphericSignals = "${insights.pressureAnalysis} · $capeNote${if (wetBulbNote.isNotBlank()) " · $wetBulbNote" else ""}"
+
+        val headline = when {
+            overallScore >= 80 -> "Crisp & Favorable Day Ahead"
+            overallScore >= 60 -> "Manageable Weather — Watch Peak Windows"
+            overallScore >= 40 -> "Mixed Weather Friction Expected"
+            else -> "Challenging Weather & Air Conditions"
+        }
+
+        val execSummary = aiEnhancedSummary ?: buildString {
+            append("Currently ${current.conditionLabel.lowercase()} at ${GeoUtils.formatTemperature(current.temperatureC, unit)} ")
+            append("(feels like ${GeoUtils.formatTemperature(current.feelsLikeC, unit)}, ${insights.dewPointComfort.lowercase()}). ")
+            if (maxRainProb >= 50) {
+                append("Rain peaks near $maxRainProb%; ")
+            } else {
+                append("Low rain chance ($maxRainProb%); ")
+            }
+            if (aqi?.usAqi != null) {
+                append("air quality is ${aqi.category.label.lowercase()} (US AQI ${aqi.usAqi}).")
+            } else {
+                append("winds peak around ${peakGust.roundToInt()} km/h.")
+            }
+        }
+
+        return TodayAiAnalysis(
+            headline = headline,
+            executiveSummary = execSummary,
+            comfortScore = overallScore,
+            comfortBreakdown = listOf(
+                ComfortBreakdownItem("Thermal", thermalScore),
+                ComfortBreakdownItem("Dryness", rainScore),
+                ComfortBreakdownItem("Air Quality", airScore),
+                ComfortBreakdownItem("Wind Calm", windScore)
+            ),
+            phases = phases,
+            keyTriggers = triggers,
+            wardrobeAndHealthTips = wardrobeTips,
+            atmosphericSignals = atmosphericSignals,
+            isAiEnhanced = aiEnhancedSummary != null
+        )
+    }
+
+    private fun summarizePhase(
+        name: String,
+        windowLabel: String,
+        hours: List<HourlyForecast>,
+        hourRange: Iterable<Int>,
+        unit: TemperatureUnit
+    ): DayPhaseForecast {
+        val allowed = hourRange.toSet()
+        val matching = hours.filter { h ->
+            val hr = h.isoTime.substringAfter("T", "").take(2).toIntOrNull()
+            hr != null && hr in allowed
+        }
+        if (matching.isEmpty()) {
+            return DayPhaseForecast(name, windowLabel, "--", "No data", 0, "Telemetry pending")
+        }
+        val minT = matching.minOf { it.temperatureC }
+        val maxT = matching.maxOf { it.temperatureC }
+        val rainPeak = matching.mapNotNull { it.precipitationProbabilityPercent }.maxOrNull() ?: 0
+        val rep = matching[matching.size / 2]
+        val tempRange = if (minT.roundToInt() == maxT.roundToInt()) {
+            GeoUtils.formatTemperature(maxT, unit, false)
+        } else {
+            "${GeoUtils.formatTemperature(minT, unit, false)}–${GeoUtils.formatTemperature(maxT, unit, false)}"
+        }
+        return DayPhaseForecast(
+            phaseName = name,
+            timeWindow = windowLabel,
+            tempRangeLabel = tempRange,
+            conditionLabel = rep.conditionLabel,
+            rainRiskPercent = rainPeak,
+            summary = "${rep.conditionLabel} · Rain $rainPeak%"
+        )
+    }
 }

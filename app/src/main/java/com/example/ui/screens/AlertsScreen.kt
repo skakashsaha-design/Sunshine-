@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.data.repository.AlertsAndDisastersBundle
 import com.example.domain.model.*
+import com.example.notification.alertCategoryVector
 import com.example.ui.UiState
 import com.example.ui.components.OriginBadge
 import com.example.ui.components.SeverityChip
@@ -135,6 +136,8 @@ fun AlertsScreen(
                         item {
                             Surface(
                                 shape = RoundedCornerShape(18.dp),
+                                color = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
                                 tonalElevation = 2.dp,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
@@ -147,8 +150,32 @@ fun AlertsScreen(
                                     HorizontalDivider()
                                     Text("Inland River Ports & Squall Outlook", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                                     Text(bmd.inlandWarning, style = MaterialTheme.typography.bodyMedium)
+                                    if (bmd.bwotWatchSummary.isNotBlank()) {
+                                        HorizontalDivider()
+                                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                                            Text("BWOT Convective & Kalboishakhi Watch", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                                            Surface(
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                shape = RoundedCornerShape(8.dp)
+                                            ) {
+                                                Text(
+                                                    "Risk: ${bmd.bwotSquallRisk}",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                                )
+                                            }
+                                        }
+                                        Text(bmd.bwotWatchSummary, style = MaterialTheme.typography.bodyMedium)
+                                    }
                                     HorizontalDivider()
                                     Text(bmd.statusNote, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    OutlinedButton(onClick = onOpenDisasters, modifier = Modifier.fillMaxWidth()) {
+                                        Icon(Icons.Default.Public, contentDescription = null, modifier = Modifier.size(18.dp))
+                                        Spacer(Modifier.width(8.dp))
+                                        Text("Open Worldwide Hazard Monitor")
+                                    }
                                 }
                             }
                         }
@@ -198,7 +225,15 @@ private fun AlertCard(alert: WeatherAlert, onClick: () -> Unit) {
     ) {
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                SeverityChip(alert.severity)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = alertCategoryVector(alert.category),
+                        contentDescription = alert.category.label,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    SeverityChip(alert.severity)
+                }
                 OriginBadge(alert.origin)
             }
             Text(alert.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -236,7 +271,13 @@ fun AlertDetailScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = alertCategoryVector(alert.category),
+                        contentDescription = alert.category.label,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
                     SeverityChip(alert.severity)
                     OriginBadge(alert.origin)
                 }

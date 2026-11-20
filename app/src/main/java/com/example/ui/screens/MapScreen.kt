@@ -65,6 +65,7 @@ fun MapScreen(
     onInspectPoint: (Double, Double) -> Unit,
     onSavePoint: (Double, Double) -> Unit,
     onOpenLocations: () -> Unit,
+    lowRamMode: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -306,7 +307,7 @@ fun MapScreen(
 
             // Disaster Event Markers
             if (showDisasters) {
-                disasters.take(60).forEach { ev ->
+                disasters.take(if (lowRamMode) 20 else 60).forEach { ev ->
                     val (ex, ey) = GeoUtils.latLonToTileDouble(ev.latitude, ev.longitude, zoom)
                     val sx = w / 2f + ((ex - cxTile) * 256.0).toFloat()
                     val sy = h / 2f + ((ey - cyTile) * 256.0).toFloat()
@@ -333,7 +334,8 @@ fun MapScreen(
                 .padding(horizontal = 14.dp, vertical = 12.dp)
                 .widthIn(max = 620.dp),
             shape = RoundedCornerShape(18.dp),
-            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+            contentColor = MaterialTheme.colorScheme.onSurface,
             tonalElevation = 4.dp
         ) {
             Row(
@@ -420,7 +422,8 @@ fun MapScreen(
                 val ev = tappedMarker!!
                 Surface(
                     shape = RoundedCornerShape(18.dp),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                     tonalElevation = 5.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -439,7 +442,8 @@ fun MapScreen(
                 val (pLat, pLon) = tappedPoint!!
                 Surface(
                     shape = RoundedCornerShape(18.dp),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                     tonalElevation = 5.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -473,7 +477,8 @@ fun MapScreen(
                 val tsFmt = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(curFrame.timestampEpochSec * 1000L))
                 Surface(
                     shape = RoundedCornerShape(18.dp),
-                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                     tonalElevation = 4.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -591,7 +596,8 @@ fun MapScreen(
                                 weatherLayer = wLayer
                                 showLayerSheet = false
                             },
-                        color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                        color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                        contentColor = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),

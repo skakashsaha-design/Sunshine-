@@ -2,7 +2,7 @@ package com.example.data.local
 
 import android.content.Context
 import androidx.room.*
-import com.example.domain.model.SavedLocation
+import com.example.domain.model.*
 import kotlinx.coroutines.flow.Flow
 
 @Entity(tableName = "saved_locations")
@@ -77,6 +77,51 @@ data class NotificationLogEntity(
     val sentEpochMs: Long
 )
 
+@Entity(tableName = "trip_plans")
+data class TripPlanEntity(
+    @PrimaryKey val id: String,
+    val title: String,
+    val locationName: String,
+    val latitude: Double,
+    val longitude: Double,
+    val isoDate: String,
+    val activityTypeName: String,
+    val timeWindowName: String,
+    val lastScore: Int,
+    val lastVerdictName: String,
+    val createdEpochMs: Long
+) {
+    fun toDomain(): SavedTripPlan = SavedTripPlan(
+        id = id,
+        title = title,
+        locationName = locationName,
+        latitude = latitude,
+        longitude = longitude,
+        isoDate = isoDate,
+        activityType = runCatching { TripActivityType.valueOf(activityTypeName) }.getOrDefault(TripActivityType.OUTDOOR_EVENT_HOSTING),
+        timeWindow = runCatching { EventTimeWindow.valueOf(timeWindowName) }.getOrDefault(EventTimeWindow.FULL_DAY),
+        lastScore = lastScore,
+        lastVerdict = runCatching { HostVerdict.valueOf(lastVerdictName) }.getOrDefault(HostVerdict.FAIR_WITH_BACKUP),
+        createdEpochMs = createdEpochMs
+    )
+
+    companion object {
+        fun fromDomain(p: SavedTripPlan) = TripPlanEntity(
+            id = p.id,
+            title = p.title,
+            locationName = p.locationName,
+            latitude = p.latitude,
+            longitude = p.longitude,
+            isoDate = p.isoDate,
+            activityTypeName = p.activityType.name,
+            timeWindowName = p.timeWindow.name,
+            lastScore = p.lastScore,
+            lastVerdictName = p.lastVerdict.name,
+            createdEpochMs = p.createdEpochMs
+        )
+    }
+}
+
 @Dao
 interface SkyPulseDao {
     @Query("SELECT * FROM saved_locations ORDER BY sortOrder ASC")
@@ -117,6 +162,15 @@ interface SkyPulseDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun markNotificationSent(entity: NotificationLogEntity)
+
+    @Query("SELECT * FROM trip_plans ORDER BY isoDate ASC, createdEpochMs DESC")
+    fun observeTripPlans(): Flow<List<TripPlanEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertTripPlan(entity: TripPlanEntity)
+
+    @Query("DELETE FROM trip_plans WHERE id = :id")
+    suspend fun deleteTripPlan(id: String)
 }
 
 @Database(
@@ -124,9 +178,10 @@ interface SkyPulseDao {
         SavedLocationEntity::class,
         CachedPayloadEntity::class,
         SearchHistoryEntity::class,
-        NotificationLogEntity::class
+        NotificationLogEntity::class,
+        TripPlanEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class SkyPulseDatabase : RoomDatabase() {

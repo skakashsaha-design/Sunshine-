@@ -123,5 +123,7 @@ data class BmdBulletin(
     val inlandWarning: String,
     val alerts: List<WeatherAlert>,
     val statusNote: String,
-    val lastCheckedEpochMs: Long
+    val lastCheckedEpochMs: Long,
+    val bwotWatchSummary: String = "",
+    val bwotSquallRisk: String = "Low"
 )

@@ -1,0 +1,3109 @@
+## NEW HIGHLIGHT FEATURES + EXTENDED API ECOSYSTEM
+
+Upgrade the weather app with the following **high-value, standout features**.
+
+Do not add fake APIs, undocumented endpoints, scraped private services, or fabricated data.
+
+Use only legitimate APIs, public datasets, official feeds, open-data services, or properly configured commercial APIs.
+
+For every provider, create a dedicated adapter so the app can switch providers without changing the UI or business logic.
+
+---
+
+# 1. EXTENDED WEATHER API ECOSYSTEM
+
+Support as many of the following legitimate providers as technically and legally possible.
+
+### Primary Weather Providers
+
+- Open-Meteo
+- MET Norway
+- WeatherAPI
+- AccuWeather
+- Tomorrow.io
+- Weatherbit
+
+### Additional Weather Providers
+
+Investigate and integrate when appropriate:
+
+- OpenWeather
+- Visual Crossing Weather
+- Weatherstack
+- Meteomatics
+- Pirate Weather
+- AerisWeather / Vaisala
+- Climacell/Tomorrow-compatible services where officially available
+- National meteorological services
+- NOAA weather services
+- Environment Canada weather services
+- UK Met Office data/services
+- Deutscher Wetterdienst (DWD)
+- MeteoSwiss
+- AEMET
+- Météo-France
+- KNMI
+- DMI
+- SMHI
+- Finnish Meteorological Institute
+- Australian Bureau of Meteorology
+- Japan Meteorological Agency
+- India Meteorological Department where accessible
+- Bangladesh Meteorological Department
+
+Do not force integration when an API requires unavailable credentials, paid access, regional restrictions, or special licensing.
+
+Instead show:
+
+`Provider requires API key`
+
+or
+
+`Provider unavailable for this configuration`
+
+Never pretend it is active.
+
+---
+
+# 2. GLOBAL OFFICIAL WEATHER DATA
+
+Create an official-data layer where available.
+
+Prioritize:
+
+- National meteorological agencies
+- Government weather services
+- Official warning systems
+- Official observation stations
+- Official radar feeds
+- Official satellite products
+
+Show the source clearly.
+
+Example:
+
+`Source: Bangladesh Meteorological Department`
+
+`Source: NOAA`
+
+`Source: MET Norway`
+
+`Source: DWD`
+
+---
+
+# 3. WEATHER MODEL COMPARISON
+
+Create a powerful:
+
+## "Model Comparison"
+
+screen.
+
+Compare available forecast models such as:
+
+- ECMWF
+- GFS
+- ICON
+- UK Met Office models where available
+- HRRR where available
+- NAM where available
+- GEM where available
+- regional models where available
+
+Compare:
+
+- Temperature
+- Rain probability
+- Precipitation
+- Wind
+- Pressure
+- Cloud cover
+- Humidity
+- Snow
+- Visibility
+
+Display:
+
+`Model agreement: High`
+
+`Model agreement: Moderate`
+
+`Model disagreement: High`
+
+Do not present model disagreement as certainty.
+
+---
+
+# 4. ENSEMBLE FORECAST
+
+Where data is available, support ensemble forecasting.
+
+Show:
+
+- Forecast range
+- Median
+- Minimum
+- Maximum
+- Spread
+- Probability
+
+Example:
+
+`Temperature`
+
+`28°C`
+
+`Possible range: 26–31°C`
+
+Explain that a wider spread means greater forecast uncertainty.
+
+---
+
+# 5. WEATHER CONFIDENCE
+
+Create a calculated:
+
+## Forecast Confidence
+
+system.
+
+Consider:
+
+- Provider agreement
+- Model agreement
+- Forecast horizon
+- Data freshness
+- Observation availability
+- Ensemble spread
+
+Display:
+
+`High confidence`
+
+`Moderate confidence`
+
+`Low confidence`
+
+Clearly label it as an app-derived indicator.
+
+Never present it as an official meteorological warning.
+
+---
+
+# 6. NOAA / GOVERNMENT WEATHER DATA
+
+Where available, support official government weather data.
+
+Possible services include:
+
+- NOAA
+- National Weather Service
+- MET Norway
+- DWD
+- Met Office
+- Environment Canada
+- Australian BOM
+- JMA
+- other national meteorological agencies
+
+Use official warnings whenever available.
+
+---
+
+# 7. WEATHER STATION DATA
+
+Create an optional:
+
+## Weather Stations
+
+screen.
+
+Show nearby stations where data is available.
+
+Display:
+
+- Station name
+- Distance
+- Temperature
+- Humidity
+- Pressure
+- Wind
+- Wind direction
+- Visibility
+- Observation time
+- Station elevation
+
+Clearly distinguish:
+
+`Observed`
+
+from
+
+`Forecast`
+
+---
+
+# 8. METAR / AVIATION WEATHER
+
+Add aviation weather support where legitimate data is available.
+
+Support:
+
+- METAR
+- TAF
+- Airport weather
+- Visibility
+- Ceiling
+- Wind
+- Temperature
+- Dew point
+- Pressure
+- Weather conditions
+
+Create:
+
+## Aviation Weather
+
+Search airports by:
+
+- Airport name
+- IATA
+- ICAO
+
+Example:
+
+`DAC`
+
+Show:
+
+- Current METAR
+- TAF
+- Observation time
+- Wind
+- Visibility
+- Ceiling
+- Weather
+
+Do not provide operational aviation advice.
+
+This is informational data only.
+
+---
+
+# 9. MARINE WEATHER
+
+Create:
+
+## Marine Weather
+
+Support marine/ocean data where available.
+
+Show:
+
+- Wave height
+- Wave period
+- Wave direction
+- Wind
+- Wind gust
+- Sea temperature
+- Swell
+- Tide information
+- Pressure
+- Visibility
+- Storm warnings
+
+Use official marine sources where possible.
+
+---
+
+# 10. TIDE DATA
+
+Add:
+
+## Tide Forecast
+
+Where reliable tide data is available.
+
+Show:
+
+- High tide
+- Low tide
+- Tide height
+- Tide direction
+- Tide timeline
+- Next tide
+- Tide chart
+
+Clearly identify the source and station.
+
+---
+
+# 11. OCEAN DATA
+
+Where APIs permit, support:
+
+- Sea surface temperature
+- Ocean waves
+- Swell
+- Currents
+- Significant wave height
+- Water temperature
+
+Use legitimate marine/open-data sources.
+
+---
+
+# 12. RADAR ECOSYSTEM
+
+Create a dedicated radar engine.
+
+Support legitimate radar sources where available.
+
+Possible sources:
+
+- National weather agencies
+- NOAA/NWS
+- RainViewer where licensing/API conditions permit
+- DWD
+- other official regional radar networks
+
+Features:
+
+- Rain radar
+- Snow radar where available
+- Storm radar
+- Radar animation
+- Timeline
+- Playback speed
+- Past radar
+- Latest radar
+- Radar legend
+- Opacity control
+
+Never imply radar coverage exists where it does not.
+
+---
+
+# 13. SATELLITE WEATHER
+
+Create:
+
+## Satellite
+
+Support legitimate satellite imagery/data sources.
+
+Possible sources:
+
+- NOAA
+- NASA
+- EUMETSAT
+- Himawari
+- GOES
+- Meteosat
+- other official satellite products
+
+Display where available:
+
+- Visible
+- Infrared
+- Water vapor
+- Cloud imagery
+- Storm imagery
+
+Allow animation when technically possible.
+
+---
+
+# 14. LIGHTNING DATA
+
+Create:
+
+## Lightning Monitor
+
+Where a legitimate data source is available.
+
+Show:
+
+- Lightning strikes
+- Strike time
+- Approximate location
+- Distance
+- Lightning density
+- Recent activity
+- Map visualization
+
+Do not claim exact lightning detection when the source provides only estimated data.
+
+---
+
+# 15. STORM TRACKING
+
+Create:
+
+## Tropical Cyclone Tracker
+
+Support:
+
+- Cyclones
+- Hurricanes
+- Typhoons
+- Tropical storms
+- Depressions
+
+Show:
+
+- Storm name
+- Category/intensity
+- Current position
+- Movement direction
+- Movement speed
+- Forecast track
+- Historical track
+- Wind radius where available
+- Pressure
+- Official warnings
+- Source
+- Update time
+
+Prioritize official tropical cyclone agencies.
+
+For Bangladesh:
+
+Prioritize official BMD information where available.
+
+---
+
+# 16. EARTHQUAKE APIs
+
+Create a global earthquake system.
+
+Possible authoritative sources:
+
+- USGS
+- EMSC
+- national geological agencies
+- other authoritative seismic services
+
+Show:
+
+- Magnitude
+- Depth
+- Location
+- Time
+- Distance from user
+- Coordinates
+- Tsunami information when provided
+- Map
+- Nearby earthquakes
+
+Filters:
+
+- 24 hours
+- 7 days
+- 30 days
+- Magnitude
+- Distance
+
+---
+
+# 17. TSUNAMI DATA
+
+Use legitimate tsunami-warning sources.
+
+Possible sources:
+
+- NOAA tsunami services
+- UNESCO/IOC
+- national tsunami warning centers
+- regional official warning systems
+
+Show:
+
+- Warning status
+- Event location
+- Time
+- Affected areas
+- Source
+- Map
+- Official instructions
+
+Never generate a tsunami warning from an app calculation.
+
+---
+
+# 18. FLOOD DATA
+
+Create:
+
+## Global Flood Monitor
+
+Support legitimate sources such as:
+
+- Global Flood Awareness System (GloFAS)
+- Copernicus services
+- government flood agencies
+- national river monitoring systems
+
+Show:
+
+- River level
+- River discharge
+- Flood probability
+- Forecast
+- Historical comparison
+- Affected area
+- Official warning
+- Model/forecast distinction
+
+---
+
+# 19. WILDFIRE DATA
+
+Support legitimate wildfire datasets.
+
+Possible sources:
+
+- NASA FIRMS
+- official national wildfire agencies
+- Copernicus emergency services
+- government fire datasets
+
+Show:
+
+- Fire location
+- Detection time
+- Fire intensity where available
+- Satellite detection
+- Distance
+- Map
+- Nearby smoke information where available
+
+Clearly label satellite detections as detections, not confirmed ground reports.
+
+---
+
+# 20. VOLCANO DATA
+
+Support authoritative volcano information.
+
+Possible sources:
+
+- Smithsonian Global Volcanism Program
+- USGS
+- national volcano observatories
+- official emergency agencies
+
+Show:
+
+- Volcano name
+- Location
+- Status
+- Activity
+- Latest update
+- Alert level where officially provided
+- Map
+
+---
+
+# 21. LANDSLIDE DATA
+
+Where legitimate datasets exist, support:
+
+- Landslide events
+- Risk information
+- Rainfall-triggered risk
+- Government warnings
+- Map locations
+
+Clearly distinguish:
+
+`Observed event`
+
+`Official warning`
+
+`Model risk`
+
+---
+
+# 22. DROUGHT MONITOR
+
+Support legitimate drought datasets where available.
+
+Possible sources:
+
+- NOAA
+- Copernicus
+- national agencies
+- global drought-monitoring datasets
+
+Show:
+
+- Drought category
+- Area
+- Trend
+- Historical comparison
+- Source
+- Update date
+
+---
+
+# 23. AIR QUALITY API ECOSYSTEM
+
+Use multiple legitimate AQI/data sources where possible.
+
+Support:
+
+- Open-Meteo air quality
+- OpenAQ
+- official government air-quality networks
+- national monitoring stations
+- other legitimate AQI APIs
+
+Show:
+
+- US AQI
+- European AQI
+- PM2.5
+- PM10
+- O3
+- NO2
+- SO2
+- CO
+- Dust
+- pollen where available
+- station observations
+
+Never mix AQI scales without identifying them.
+
+---
+
+# 24. POLLEN DATA
+
+Where an API legitimately provides it:
+
+Show:
+
+- Tree pollen
+- Grass pollen
+- Weed pollen
+- Pollen level
+- Forecast
+- Source
+
+Clearly state when pollen data is unavailable.
+
+---
+
+# 25. UV DATA
+
+Support UV information from legitimate weather/solar sources.
+
+Show:
+
+- Current UV
+- Maximum UV
+- UV forecast
+- Sunrise
+- Sunset
+- Solar radiation where available
+
+---
+
+# 26. SOLAR / SPACE WEATHER
+
+Add an optional:
+
+## Space Weather
+
+section.
+
+Where reliable data is available, support official sources such as NOAA/SWPC.
+
+Show:
+
+- Solar activity
+- Solar flares
+- Geomagnetic activity
+- Kp index
+- Solar wind
+- Aurora possibility where appropriate
+- Space-weather alerts
+
+Clearly distinguish space weather from normal atmospheric weather.
+
+---
+
+# 27. ASTRONOMY API/DATA
+
+Support legitimate astronomy data.
+
+Show:
+
+- Sunrise
+- Sunset
+- Solar noon
+- Day length
+- Moonrise
+- Moonset
+- Moon phase
+- Moon illumination
+- Twilight
+- Golden hour where data allows
+- astronomical twilight
+
+Use calculated astronomical data only when the calculation is reliable.
+
+---
+
+# 28. GLOBAL DISASTER API LAYER
+
+Create one unified:
+
+## Disaster Intelligence
+
+system.
+
+Potential legitimate sources:
+
+- GDACS
+- NASA EONET
+- USGS
+- NOAA
+- Copernicus Emergency Management Service
+- national emergency agencies
+- official disaster-warning systems
+
+Categories:
+
+- Earthquake
+- Tsunami
+- Flood
+- Cyclone
+- Hurricane
+- Typhoon
+- Wildfire
+- Volcano
+- Landslide
+- Severe storm
+- Drought
+- Extreme weather
+
+Every event must contain:
+
+`Source`
+
+`Event type`
+
+`Location`
+
+`Time`
+
+`Severity if officially provided`
+
+`Status`
+
+`Map`
+
+`Last update`
+
+---
+
+# 29. NASA DATA INTEGRATION
+
+Where appropriate and legally/API-accessible, use NASA public APIs/data.
+
+Potential areas:
+
+- Earth observation
+- EONET natural events
+- FIRMS/fire data where supported
+- satellite information
+- astronomy-related data
+
+Do not overload the app with unnecessary NASA features.
+
+Only integrate data that improves the weather/environment/disaster experience.
+
+---
+
+# 30. COPERNICUS / EUROPEAN DATA
+
+Where available, investigate:
+
+- Copernicus Atmosphere Monitoring Service
+- Copernicus Emergency Management Service
+- Copernicus Climate Change Service
+- Copernicus Marine Service
+
+Use proper APIs and authentication requirements.
+
+Clearly label model/reanalysis/satellite/official products.
+
+---
+
+# 31. OPEN DATA DISCOVERY
+
+The architecture should allow additional APIs to be added later.
+
+Create:
+
+`ProviderRegistry`
+
+Each provider should define:
+
+- Provider name
+- Provider type
+- API base URL
+- Authentication requirement
+- Supported features
+- Supported countries
+- Data freshness
+- Rate limits
+- License/attribution
+- Availability status
+
+Example provider categories:
+
+`WEATHER`
+
+`RADAR`
+
+`SATELLITE`
+
+`AQI`
+
+`EARTHQUAKE`
+
+`FLOOD`
+
+`WILDFIRE`
+
+`VOLCANO`
+
+`TSUNAMI`
+
+`CYCLONE`
+
+`ASTRONOMY`
+
+`SPACE_WEATHER`
+
+`MARINE`
+
+`TIDE`
+
+`AVIATION`
+
+---
+
+# 32. API HEALTH CENTER
+
+Create:
+
+## Data Sources
+
+Show all configured providers.
+
+Example:
+
+Open-Meteo  
+● Available
+
+MET Norway  
+● Available
+
+WeatherAPI  
+● API key required
+
+BMD  
+● Official source
+
+USGS  
+● Available
+
+NASA EONET  
+● Available
+
+Google Maps  
+● API key required
+
+This makes the application transparent.
+
+---
+
+# 33. API FALLBACK SYSTEM
+
+If Provider A fails:
+
+Provider B
+
+If Provider B fails:
+
+Provider C
+
+If every online provider fails:
+
+Cached data
+
+Never crash.
+
+Never silently show old data as current.
+
+Always show:
+
+`Data source`
+
+`Last update`
+
+`Offline/Stale status`
+
+---
+
+# 34. API COST CONTROL
+
+Implement intelligent provider selection.
+
+Prefer:
+
+1. Free/open official data
+2. Free public APIs
+3. User-configured APIs
+4. Commercial APIs only when configured
+
+Avoid unnecessary API requests.
+
+Cache responses.
+
+Respect rate limits.
+
+Use WorkManager for background updates.
+
+Do not continuously poll APIs.
+
+---
+
+# 35. API KEY SECURITY
+
+Never hardcode private API keys in source code.
+
+Never commit secrets to GitHub.
+
+Never expose secret keys in UI.
+
+Use:
+
+- local configuration
+- BuildConfig where appropriate
+- secure backend/proxy when required
+- environment/secrets configuration
+
+Public client-side keys such as properly restricted Google Maps keys must still use appropriate application restrictions.
+
+---
+
+# 36. SOURCE TRANSPARENCY
+
+Every important data item should be traceable.
+
+Example:
+
+`Temperature: 29°C`
+
+`Source: Open-Meteo`
+
+`Updated: 3 min ago`
+
+Or:
+
+`Cyclone warning`
+
+`Source: Bangladesh Meteorological Department`
+
+`Official warning`
+
+This is mandatory for critical information.
+
+---
+
+# 37. FEATURE HIGHLIGHT SCREEN
+
+Create a beautiful:
+
+## "Weather Intelligence"
+
+screen containing shortcuts to:
+
+- Live Weather
+- Forecast
+- Radar
+- Satellite
+- Weather Graphs
+- Model Comparison
+- AQI
+- Lightning
+- Cyclone Tracker
+- Earthquakes
+- Flood Monitor
+- Wildfire Monitor
+- Volcano Monitor
+- Tsunami Alerts
+- Space Weather
+- Astronomy
+- Marine Weather
+- Aviation Weather
+- Emergency Numbers
+
+Use cards and categories.
+
+Do not place every feature on the Home screen.
+
+---
+
+# 38. SMART DATA FUSION
+
+When several sources provide the same metric:
+
+Compare them.
+
+Example:
+
+Open-Meteo: 29.1°C  
+WeatherAPI: 29°C  
+MET Norway: 28.9°C
+
+Display:
+
+`Current temperature: 29°C`
+
+`Sources agree closely`
+
+But do not invent an average when source data should remain independent.
+
+Allow users to open:
+
+`Compare sources`
+
+---
+
+# 39. FINAL REQUIREMENT
+
+The app must feel like a combination of:
+
+- Premium weather app
+- Professional meteorological dashboard
+- Weather radar
+- Environmental monitor
+- Air-quality monitor
+- Astronomy dashboard
+- Disaster-monitoring center
+- Bangladesh weather companion
+- Global weather intelligence platform
+
+The additional APIs must improve the application rather than create unnecessary complexity.
+
+Prioritize:
+
+**Accuracy → Official sources → Reliability → Transparency → Performance → UI**
+
+Never sacrifice data integrity for the number of APIs.
+
+If an API cannot legally, technically, or reliably be integrated:
+
+DO NOT FABRICATE IT.
+
+Mark it:
+
+`Not available`
+
+`Requires API key`
+
+`Requires external configuration`
+
+or
+
+`Not available in this region`
+
+Then continue building the rest of the application.
+
+Most importantly:
+
+**DO NOT STOP AT A UI MOCKUP.**
+
+**IMPLEMENT → BUILD → TEST → FIX → VERIFY → GENERATE APK.**You are an expert Android architect, Kotlin engineer, meteorological-data engineer, GIS/map engineer, disaster-information engineer, astronomy engineer, API integration engineer, UI/UX designer, performance engineer, accessibility engineer, and QA engineer.
+
+I am providing an existing HTML/CSS/JavaScript weather application named **"Final product"**.
+
+READ THE ENTIRE PROVIDED SOURCE CAREFULLY BEFORE IMPLEMENTING ANYTHING.
+
+The existing application is the BASELINE.
+
+Do not throw it away.  
+Do not simplify it.  
+Do not make a WebView wrapper.  
+Do not make a basic weather demo.
+
+Build a REAL, native, production-quality **Kotlin Android weather application** that preserves ALL existing functionality and expands it into a premium global weather, environmental, astronomy, radar, alert, and disaster-information platform.
+
+---
+
+# 1. CORE OBJECTIVE
+
+Build an application combining:
+
+- Premium weather app
+- Professional meteorological dashboard
+- Weather radar
+- Satellite weather
+- Weather maps
+- Air-quality monitor
+- Astronomy dashboard
+- Global disaster monitor
+- Bangladesh weather companion
+- India weather support
+- Japan weather support
+- Worldwide weather support
+- Severe-weather alert center
+- Emergency information center
+- Offline weather application
+
+The application must feel like a polished commercial weather application, not an HTML-to-APK conversion.
+
+---
+
+# 2. NATIVE ANDROID REQUIREMENT
+
+Use:
+
+- Kotlin
+- Android SDK
+- Jetpack
+- Coroutines
+- Flow / StateFlow
+- MVVM or Clean Architecture
+- Repository pattern
+- Retrofit
+- OkHttp
+- Room
+- DataStore
+- WorkManager
+- Android Notifications
+- Material 3
+- Jetpack Compose where appropriate
+- XML Views where they provide better compatibility/performance
+
+DO NOT use WebView as the application architecture.
+
+The original HTML/CSS/JS is the feature reference and functional baseline only.
+
+---
+
+# 3. 1 GB RAM MODE
+
+This is extremely important.
+
+The application must run properly on low-end Android devices, including devices with approximately:
+
+**1 GB RAM**
+
+Create:
+
+## Low-RAM Mode
+
+Automatically detect available memory and optimize accordingly.
+
+Allow:
+
+- Automatic
+- Low RAM
+- Balanced
+- High Performance
+
+Low-RAM mode must:
+
+- Reduce animations
+- Reduce map rendering complexity
+- Avoid unnecessary background work
+- Limit simultaneously loaded charts
+- Release unused resources
+- Reduce image resolution
+- Avoid loading unnecessary satellite imagery
+- Avoid keeping many screens in memory
+- Limit cached images
+- Limit map markers
+- Use lightweight icons
+- Reduce animation frame rate
+- Avoid expensive blur effects
+- Avoid unnecessary shadows
+- Avoid excessive recomposition
+- Avoid unnecessary network requests
+- Use lazy loading
+- Use pagination where appropriate
+- Close unused network resources
+- Avoid memory leaks
+
+Do not remove important functionality merely because the device is low-end.
+
+Instead degrade gracefully.
+
+---
+
+# 4. HIGH-END OPTIMIZATION
+
+For powerful devices:
+
+Enable:
+
+- Smooth animations
+- High-quality charts
+- Advanced map layers
+- Satellite imagery
+- Radar animation
+- Weather backgrounds
+- Rich transitions
+- More simultaneous data
+- Higher visual quality
+
+The same application must intelligently scale between low-end and high-end devices.
+
+---
+
+# 5. REDUCED ANIMATION MODE
+
+Add:
+
+## Reduce Animation
+
+Settings:
+
+- Full
+- Reduced
+- Minimal
+- Off
+
+Respect Android accessibility/reduced-motion preferences where available.
+
+When enabled:
+
+- Reduce transitions
+- Reduce weather animation
+- Reduce radar animation
+- Reduce splash animation
+- Reduce chart animation
+- Reduce background motion
+
+Do not disable important visual information.
+
+---
+
+# 6. PERMISSIONS
+
+Implement Android permissions correctly.
+
+### Internet
+
+- INTERNET
+- ACCESS_NETWORK_STATE
+
+### Location
+
+Use:
+
+- ACCESS_COARSE_LOCATION
+- ACCESS_FINE_LOCATION
+
+Request location only when needed.
+
+Do not request background location unless a genuine feature requires it.
+
+If background alert functionality requires background location, explain why before requesting it.
+
+If location permission is denied:
+
+- Do not crash
+- Allow manual city search
+- Allow map selection
+- Allow saved locations
+
+### Notifications
+
+For Android versions requiring it:
+
+- POST_NOTIFICATIONS
+
+Create a proper permission explanation.
+
+Support:
+
+- Weather notifications
+- Severe weather alerts
+- Rain alerts
+- AQI alerts
+- Disaster alerts
+- Live weather notification
+
+### Camera
+
+Only request:
+
+- CAMERA
+
+if an actual camera feature exists.
+
+Do not request unnecessary camera permission.
+
+Possible legitimate future feature:
+
+- Weather/photo attachment
+- Sky/weather observation
+- QR/configuration scanning
+
+If no camera feature exists, do not request CAMERA.
+
+### Files
+
+Use modern Android:
+
+- Storage Access Framework
+- Android Photo Picker
+- Document Picker
+
+Avoid unnecessary broad storage permissions.
+
+Possible uses:
+
+- Import/export settings
+- Import locations
+- Export weather data
+- Save/share reports
+- Import custom wallpaper
+
+### Other permissions
+
+Use only when genuinely needed:
+
+- VIBRATE
+- RECEIVE_BOOT_COMPLETED
+- FOREGROUND_SERVICE
+- exact alarm-related permissions if genuinely required
+
+Never request unnecessary permissions.
+
+Create a:
+
+## Permission Manager
+
+screen showing:
+
+- Permission
+- Why it is needed
+- Current status
+- Enable button
+- Denied status
+- Settings shortcut
+
+Handle permanent denial gracefully.
+
+---
+
+# 7. OFFLINE-FIRST ARCHITECTURE
+
+Offline support is mandatory.
+
+Use:
+
+- Room
+- DataStore
+- local JSON/static datasets where appropriate
+- HTTP caching
+- WorkManager
+
+Cache:
+
+- Current weather
+- Hourly forecast
+- Daily forecast
+- AQI
+- Alerts
+- Disaster events
+- Saved locations
+- Astronomy
+- Weather graphs
+- Provider status
+- Emergency numbers
+- Useful numbers
+- Recent searches
+- Last successful map/radar metadata
+
+When offline:
+
+Display:
+
+**OFFLINE**
+
+and:
+
+**Last updated: X**
+
+Never call cached information "LIVE".
+
+Show:
+
+- Online
+- Offline
+- Stale
+- Updated
+- Live
+
+clearly.
+
+The app must still open and remain useful without internet.
+
+---
+
+# 8. WEATHER PROVIDER SYSTEM
+
+Create a provider abstraction.
+
+Support as many legitimate providers as technically and legally possible.
+
+Primary providers:
+
+- Open-Meteo
+- MET Norway
+- WeatherAPI
+- AccuWeather
+- Tomorrow.io
+- Weatherbit
+
+Additional providers where available:
+
+- OpenWeather
+- Visual Crossing
+- Weatherstack
+- Meteomatics
+- NOAA/NWS
+- DWD
+- UK Met Office
+- Environment Canada
+- Australian Bureau of Meteorology
+- Japan Meteorological Agency
+- India Meteorological Department
+- Bangladesh Meteorological Department
+- Météo-France
+- KNMI
+- DMI
+- SMHI
+- MeteoSwiss
+- AEMET
+- other national meteorological services
+
+Do not activate providers that require credentials unless configured.
+
+Display:
+
+`API key required`
+
+or:
+
+`Not configured`
+
+instead of pretending they work.
+
+---
+
+# 9. GOOGLE WEATHER API
+
+Integrate the official:
+
+## Google Maps Platform Weather API
+
+when properly configured.
+
+Use legitimate documented endpoints for:
+
+- Current conditions
+- Hourly forecast
+- Daily forecast
+- Hourly history
+- Severe weather alerts
+
+Google Weather currently provides current conditions, forecasts and severe-weather alerts.
+
+Use Google Weather as an actual provider.
+
+Never:
+
+- Scrape Google Weather
+- Fake Google Weather
+- Rename another provider as Google
+- Use undocumented endpoints
+
+Display:
+
+`Source: Google Weather`
+
+when the actual data came from Google.
+
+Google Weather requires proper Google Cloud/API configuration, so clearly report when configuration is missing.
+
+---
+
+# 10. GOOGLE MAPS
+
+Integrate:
+
+## Google Maps Platform
+
+Features:
+
+- Current location
+- Search
+- Map selection
+- Saved locations
+- Satellite
+- Terrain where available
+- Coordinates
+- Weather overlays where supported
+- Disaster markers
+- Earthquake markers
+- Flood markers
+- Wildfire markers
+- Volcano markers
+- Cyclone tracks
+- Storm tracks
+
+Use secure API-key restrictions.
+
+If Google Maps is not configured, provide a useful fallback map system.
+
+---
+
+# 11. BANGLADESH WEATHER
+
+Prioritize:
+
+## Bangladesh Meteorological Department
+
+Support where technically and legally available:
+
+- Weather
+- Forecast
+- Warnings
+- Cyclone information
+- Heavy rain
+- Thunderstorms
+- Heatwave
+- Cold wave
+- Marine warnings
+- Inland warnings
+- Severe weather
+
+Clearly distinguish:
+
+**OFFICIAL BMD**
+
+from:
+
+**MODEL FORECAST**
+
+from:
+
+**APP CALCULATION**
+
+Never fabricate BMD data.
+
+---
+
+# 12. INDIA WEATHER
+
+Add dedicated India support.
+
+Prioritize:
+
+## India Meteorological Department
+
+Use official IMD APIs/services where accessible.
+
+Support available products such as:
+
+- Current weather
+- City forecast
+- District forecast
+- District rainfall
+- State rainfall
+- Nowcast
+- District warnings
+- Station observations
+- AWS/ARG data
+- River-basin precipitation
+- Port weather
+- official warnings
+
+IMD's documented APIs include city forecasts, current weather, district nowcasts, rainfall and district warnings.
+
+Respect IMD access requirements and terms.
+
+---
+
+# 13. JAPAN WEATHER
+
+Add dedicated Japan support.
+
+Prioritize:
+
+## Japan Meteorological Agency
+
+Support legitimate JMA data/services where accessible.
+
+Also support JMA model data through legitimate weather-data providers where appropriate.
+
+Open-Meteo currently provides access to multiple weather models including JMA globally.
+
+Support:
+
+- Weather
+- Rain
+- Snow
+- Typhoon
+- Wind
+- Temperature
+- Warnings
+- Earthquake-related official information where available
+- Marine weather where available
+
+Never invent Japanese warning data.
+
+---
+
+# 14. WORLDWIDE WEATHER
+
+The app must work globally.
+
+Support:
+
+- Asia
+- Europe
+- North America
+- South America
+- Africa
+- Oceania
+- Arctic/Antarctic where data exists
+
+Use country-specific official sources whenever practical.
+
+---
+
+# 15. WEATHER VARIABLES
+
+Support:
+
+- Temperature
+- Feels-like
+- Heat index
+- Wind chill
+- Dew point
+- Wet-bulb temperature
+- Humidity
+- Pressure
+- Pressure trend
+- Wind speed
+- Wind gust
+- Wind direction
+- Visibility
+- Cloud cover
+- Low cloud
+- Mid cloud
+- High cloud
+- Rain
+- Snow
+- Sleet
+- Hail
+- Precipitation probability
+- Thunderstorm probability
+- UV
+- Solar radiation
+- Soil temperature
+- Soil moisture
+- Freezing level where available
+
+---
+
+# 16. WIND SYSTEM
+
+Create a professional wind component.
+
+Display:
+
+- Wind speed
+- Gust
+- Direction
+- Degrees
+- 8-point compass
+- 16-point compass
+- Direction arrow
+- Beaufort scale
+
+Example:
+
+NW  
+315°  
+18 km/h  
+Gust 31 km/h
+
+Clearly explain:
+
+**Wind direction means the direction FROM which the wind is coming.**
+
+---
+
+# 17. COMPREHENSIVE UNITS
+
+Temperature:
+
+- °C
+- °F
+- K
+
+Wind:
+
+- km/h
+- mph
+- m/s
+- knots
+- ft/s
+- Beaufort
+
+Pressure:
+
+- hPa
+- mbar
+- bar
+- kPa
+- mmHg
+- inHg
+- psi
+
+Precipitation:
+
+- mm
+- cm
+- inches
+
+Precipitation rate:
+
+- mm/h
+- in/h
+
+Visibility:
+
+- km
+- miles
+- meters
+- feet
+
+Distance:
+
+- km
+- miles
+- meters
+- feet
+
+Altitude:
+
+- meters
+- feet
+
+Snow:
+
+- mm
+- cm
+- inches
+
+AQI:
+
+- US AQI
+- European AQI
+
+Do not mathematically pretend different AQI scales are equivalent.
+
+---
+
+# 18. "WHAT DOES THIS MEAN?" SYSTEM
+
+Every technical metric gets an information button.
+
+Explain simply:
+
+Temperature  
+= How hot or cold the air is.
+
+Feels-like  
+= How the temperature may feel after considering factors such as humidity and wind.
+
+Dew point  
+= The temperature at which air becomes saturated with moisture.
+
+Humidity  
+= The amount of water vapor in the air relative to the air's capacity at that temperature.
+
+Pressure  
+= The force exerted by the atmosphere.
+
+Wind  
+= Sustained movement of air.
+
+Gust  
+= A short-duration increase in wind speed.
+
+Wind direction  
+= The direction FROM which the wind is coming.
+
+Visibility  
+= Approximate distance at which objects can be clearly seen.
+
+Cloud cover  
+= The portion of the sky covered by clouds.
+
+Precipitation  
+= Water falling from the atmosphere, including rain and snow.
+
+Rain probability  
+= Probability of measurable precipitation at the selected location during the stated period.
+
+UV index  
+= Measure of ultraviolet radiation reaching the surface.
+
+AQI  
+= Index describing the potential health impact of air pollution.
+
+PM2.5  
+= Very small airborne particles 2.5 micrometers or smaller.
+
+CAPE  
+= Atmospheric energy that can support strong upward convection and thunderstorms.
+
+Provide Bengali explanations when Bengali is selected.
+
+---
+
+# 19. WEATHER GRAPHS
+
+Create a dedicated:
+
+## Weather Graphs
+
+screen.
+
+Support:
+
+- Temperature graph
+- Feels-like graph
+- Dew point graph
+- Humidity graph
+- Pressure graph
+- Wind-speed graph
+- Gust graph
+- Rain probability graph
+- Precipitation graph
+- Cloud-cover graph
+- Visibility graph
+- UV graph
+- AQI graph
+- PM2.5 graph
+- PM10 graph
+- Snow graph
+- CAPE graph
+- Thunderstorm probability graph
+
+Time ranges:
+
+- 24 hours
+- 48 hours
+- 7 days
+- Custom where supported
+
+Every graph needs:
+
+- Tooltip
+- Units
+- Time
+- Current value
+- Min/max
+- Legend
+- Accessible description
+
+---
+
+# 20. RAIN GRAPH
+
+Create a dedicated:
+
+## Rain
+
+screen.
+
+Show:
+
+- Rain probability
+- Rain amount
+- Rain intensity
+- Hourly precipitation
+- Accumulated precipitation
+- Rain/snow distinction
+- Thunderstorm probability
+
+Use:
+
+- Bar chart for precipitation
+- Line chart for probability
+
+Avoid misleading graphs.
+
+---
+
+# 21. AQI GRAPH
+
+Create:
+
+## Air Quality Graph
+
+Show:
+
+- AQI
+- PM2.5
+- PM10
+- O3
+- NO2
+- SO2
+- CO
+
+Support:
+
+- Current
+- Hourly
+- Daily
+- Trend
+- Forecast where available
+
+Clearly identify:
+
+US AQI  
+or  
+European AQI
+
+---
+
+# 22. PRESSURE GRAPH
+
+Show:
+
+- Current pressure
+- Hourly pressure
+- Daily pressure
+- Pressure trend
+
+Explain pressure changes without claiming that a pressure change guarantees a particular weather event.
+
+---
+
+# 23. CLOUD GRAPH
+
+Show:
+
+- Total cloud
+- Low cloud
+- Mid cloud
+- High cloud
+
+Use percentages.
+
+---
+
+# 24. WEATHER MODEL COMPARISON
+
+Compare:
+
+- ECMWF
+- GFS
+- ICON
+- JMA
+- UK models
+- regional models where available
+
+Compare:
+
+- Temperature
+- Rain
+- Wind
+- Pressure
+- Cloud
+- Humidity
+
+Show:
+
+`Model agreement: High`
+
+or:
+
+`Model disagreement: High`
+
+Do not present model output as certainty.
+
+---
+
+# 25. LIVE WEATHER NOTIFICATION
+
+Add an optional:
+
+## Live Weather Notification
+
+User can enable/disable it.
+
+Example:
+
+**Dhaka**  
+28°C • Partly Cloudy  
+Feels 31°C  
+Rain 60%  
+Wind 14 km/h  
+AQI 72
+
+Support:
+
+- Persistent notification
+- Compact mode
+- Expanded mode
+- Refresh interval
+- Temperature
+- Condition
+- Rain
+- Wind
+- AQI
+- Severe-alert indicator
+
+Use Android notification channels.
+
+Do not constantly poll.
+
+Use intelligent updates and WorkManager/appropriate foreground mechanisms only when genuinely required.
+
+---
+
+# 26. WEATHER ALERTS FOR ALL NATIONS
+
+Create a global alert system.
+
+Support, where available:
+
+- Thunderstorm
+- Lightning
+- Heavy rain
+- Flash flood
+- River flood
+- Cyclone
+- Hurricane
+- Typhoon
+- Tropical storm
+- Tornado
+- Extreme wind
+- Heatwave
+- Cold wave
+- Snow
+- Ice
+- Fog
+- Dust storm
+- Hail
+- Wildfire
+- Earthquake
+- Tsunami
+- Volcano
+- Landslide
+- Drought
+- Other official hazards
+
+Prioritize official national warning agencies.
+
+---
+
+# 27. DISASTER APIs
+
+Support legitimate sources such as:
+
+- GDACS
+- NASA EONET
+- USGS
+- NOAA
+- Copernicus
+- national disaster agencies
+- national meteorological agencies
+
+GDACS provides free API access for global disaster data.
+
+NASA EONET provides continuously updated natural-event metadata through an API.
+
+---
+
+# 28. EARTHQUAKE SYSTEM
+
+Support:
+
+- USGS
+- EMSC
+- official national seismic agencies
+
+Show:
+
+- Magnitude
+- Depth
+- Location
+- Time
+- Distance
+- Map
+- Tsunami information
+- Nearby events
+
+---
+
+# 29. FLOOD SYSTEM
+
+Support legitimate:
+
+- GloFAS
+- Copernicus
+- national flood agencies
+- river monitoring services
+
+Show:
+
+- River level
+- River discharge
+- Flood probability
+- Forecast
+- Historical comparison
+- Official warnings
+
+---
+
+# 30. WILDFIRE SYSTEM
+
+Support:
+
+- NASA FIRMS
+- official wildfire agencies
+- Copernicus
+
+Show:
+
+- Fire location
+- Detection time
+- Map
+- Distance
+- Intensity where available
+- Smoke information where available
+
+Clearly distinguish satellite detection from confirmed ground reports.
+
+---
+
+# 31. VOLCANO SYSTEM
+
+Support:
+
+- Smithsonian Global Volcanism Program
+- USGS
+- official volcano observatories
+
+Show:
+
+- Volcano
+- Location
+- Activity
+- Status
+- Alert level where officially provided
+- Update time
+- Map
+
+---
+
+# 32. TSUNAMI SYSTEM
+
+Use:
+
+- NOAA tsunami services
+- UNESCO/IOC
+- National Tsunami Warning Centers
+- official regional systems
+
+Never create a fake tsunami warning.
+
+---
+
+# 33. RADAR
+
+Create professional radar.
+
+Support legitimate radar sources such as:
+
+- National weather agencies
+- NOAA/NWS
+- RainViewer where permitted
+- regional radar networks
+
+Features:
+
+- Rain radar
+- Snow radar
+- Storm radar
+- Animation
+- Timeline
+- Playback
+- Opacity
+- Legend
+
+---
+
+# 34. SATELLITE
+
+Support legitimate:
+
+- NOAA
+- NASA
+- EUMETSAT
+- GOES
+- Himawari
+- Meteosat
+
+Possible layers:
+
+- Visible
+- Infrared
+- Water vapor
+- Cloud imagery
+
+---
+
+# 35. LIGHTNING
+
+Where legitimate data exists:
+
+Show:
+
+- Lightning strikes
+- Time
+- Approximate location
+- Distance
+- Lightning density
+- Recent activity
+
+---
+
+# 36. MARINE WEATHER
+
+Show:
+
+- Waves
+- Swell
+- Wave period
+- Wave direction
+- Wind
+- Gust
+- Sea temperature
+- Tide
+- Marine warnings
+
+---
+
+# 37. TIDE SYSTEM
+
+Show:
+
+- High tide
+- Low tide
+- Tide height
+- Next tide
+- Tide graph
+- Station
+
+---
+
+# 38. AVIATION WEATHER
+
+Support legitimate METAR/TAF data.
+
+Show:
+
+- Airport
+- ICAO/IATA
+- METAR
+- TAF
+- Wind
+- Visibility
+- Ceiling
+- Temperature
+- Dew point
+- Pressure
+
+Informational only.
+
+---
+
+# 39. AIR QUALITY
+
+Support:
+
+- Open-Meteo AQI
+- OpenAQ
+- government monitoring networks
+- national AQI systems
+- other legitimate APIs
+
+Show:
+
+- AQI
+- PM2.5
+- PM10
+- O3
+- NO2
+- SO2
+- CO
+- Dust
+- Pollen where available
+
+---
+
+# 40. ASTRONOMY
+
+Show:
+
+- Sunrise
+- Sunset
+- Solar noon
+- Day length
+- Moonrise
+- Moonset
+- Moon phase
+- Moon illumination
+- Civil twilight
+- Nautical twilight
+- Astronomical twilight
+
+---
+
+# 41. SPACE WEATHER
+
+Where reliable official data exists:
+
+Support:
+
+- NOAA/SWPC
+- Solar activity
+- Solar flares
+- Kp
+- Geomagnetic activity
+- Solar wind
+- Aurora information
+
+Clearly label space weather separately from atmospheric weather.
+
+---
+
+# 42. EMERGENCY NUMBERS
+
+Create:
+
+## Emergency & Useful Numbers
+
+Bangladesh:
+
+- National emergency
+- Police
+- Fire
+- Ambulance/medical
+- Disaster services
+- Government emergency services
+- Weather/BMD
+- Flood services
+- Electricity
+- Gas
+- Water
+- Transport
+- Coast Guard
+- Search and rescue
+
+Worldwide:
+
+Use country-specific maintained datasets.
+
+Never assume one emergency number works globally.
+
+Every number must contain:
+
+- Country
+- Organization
+- Service
+- Number
+- Source
+- Verification date
+- Call button where appropriate
+
+Never invent emergency numbers.
+
+---
+
+# 43. WORLDWIDE INFORMATION CENTER
+
+When the user selects another country:
+
+Automatically display that country's relevant:
+
+- Emergency numbers
+- Weather service
+- Disaster services
+- Flood services
+- Electricity emergency
+- Gas
+- Water
+- Transport
+- Tourist information
+- Government services
+
+---
+
+# 44. LANGUAGES
+
+Initial:
+
+- English
+- বাংলা
+
+Architecture must support:
+
+- Hindi
+- Urdu
+- Arabic
+- Japanese
+- Chinese
+- Korean
+- Spanish
+- French
+- German
+- Portuguese
+- Turkish
+- Indonesian
+- Malay
+- Nepali
+
+Only show a language when translations are complete.
+
+Never mix broken machine-translated text with English.
+
+---
+
+# 45. SPLASH SCREEN
+
+Create a native Android splash screen.
+
+Include:
+
+- Modern weather logo
+- App name
+- Minimal animation
+- Light/dark adaptation
+
+Keep it short.
+
+---
+
+# 46. MODERN LOGO AND ICON SYSTEM
+
+Create:
+
+- App icon
+- Adaptive icon
+- Monochrome icon
+- Splash logo
+- Notification icon
+- Widget icon
+
+Use a consistent modern vector icon family.
+
+Weather icons:
+
+- Clear
+- Cloudy
+- Partly cloudy
+- Rain
+- Heavy rain
+- Thunderstorm
+- Snow
+- Sleet
+- Fog
+- Wind
+- Hail
+
+Data icons:
+
+- Temperature
+- Humidity
+- Dew point
+- Pressure
+- Wind
+- Gust
+- Visibility
+- Rain
+- UV
+- AQI
+- Sun
+- Moon
+
+Disaster icons:
+
+- Flood
+- Cyclone
+- Earthquake
+- Tsunami
+- Wildfire
+- Volcano
+- Landslide
+- Thunderstorm
+
+---
+
+# 47. PERSONALIZED DASHBOARD
+
+Allow:
+
+- Show/hide metrics
+- Reorder cards
+- Compact/standard layout
+- Main metric selection
+- Graph selection
+- AQI visibility
+- Astronomy visibility
+- Alert visibility
+- Weather background
+- Animation intensity
+
+Do not put every metric on the Home screen.
+
+---
+
+# 48. WIDGETS
+
+Create:
+
+1. Current weather
+2. Current + hourly
+3. 7-day forecast
+4. AQI
+5. Weather alerts
+6. Temperature
+7. Wind
+
+Widgets must work with light/dark themes and low-memory devices.
+
+---
+
+# 49. SOURCE TRANSPARENCY
+
+Every important data item should show:
+
+- Source
+- Update time
+- Data type
+- Freshness
+
+Example:
+
+`29°C`
+
+`Source: Open-Meteo`
+
+`Updated 3 min ago`
+
+For warnings:
+
+`Source: Bangladesh Meteorological Department`
+
+`OFFICIAL WARNING`
+
+Never call cached information live.
+
+---
+
+# 50. PROVIDER HEALTH SYSTEM
+
+Create:
+
+## Data Sources
+
+Show:
+
+Open-Meteo  
+Available
+
+Google Weather  
+API configured
+
+IMD  
+Available
+
+BMD  
+Official source
+
+USGS  
+Available
+
+NASA EONET  
+Available
+
+WeatherAPI  
+API key required
+
+This must be transparent.
+
+---
+
+# 51. SMART FALLBACK
+
+If Provider A fails:
+
+Provider B
+
+If Provider B fails:
+
+Provider C
+
+If all providers fail:
+
+Cached data
+
+Never crash.
+
+Never silently display stale information as current.
+
+---
+
+# 52. API SECURITY
+
+Never hardcode private API keys.
+
+Never commit secrets to GitHub.
+
+Use:
+
+- Build configuration
+- Secure configuration
+- Environment variables
+- Backend proxy when required
+- Restricted Google API keys
+
+Google specifically recommends restricting Google API keys to protect against unauthorized use.
+
+Do not add Firebase unless it is genuinely required.
+
+Do not require `google-services.json` unless Firebase is actually being used.
+
+---
+
+# 53. API COST AND RATE LIMIT CONTROL
+
+Prefer:
+
+1. Free official APIs
+2. Open/public APIs
+3. Free tiers
+4. User-configured commercial APIs
+
+Respect:
+
+- Rate limits
+- Licensing
+- Attribution
+- API terms
+
+Cache responses.
+
+Use WorkManager for periodic updates.
+
+Do not continuously poll.
+
+---
+
+# 54. API REGISTRY
+
+Create:
+
+`ProviderRegistry`
+
+Each provider defines:
+
+- Name
+- Category
+- Base URL
+- Authentication
+- Features
+- Countries
+- Rate limits
+- License
+- Attribution
+- Availability
+- Last successful request
+
+Categories:
+
+- WEATHER
+- AQI
+- RADAR
+- SATELLITE
+- LIGHTNING
+- FLOOD
+- EARTHQUAKE
+- TSUNAMI
+- CYCLONE
+- WILDFIRE
+- VOLCANO
+- LANDSLIDE
+- MARINE
+- TIDE
+- AVIATION
+- ASTRONOMY
+- SPACE WEATHER
+- EMERGENCY
+
+---
+
+# 55. PERFORMANCE
+
+Optimize:
+
+- RAM
+- CPU
+- Battery
+- Network
+- Database
+- Maps
+- Charts
+- Animations
+- Images
+
+Use:
+
+- Lazy loading
+- Pagination
+- Cache
+- Room
+- Coroutines
+- Flow
+- Efficient recomposition
+- Resource cleanup
+
+No memory leaks.
+
+No unnecessary background services.
+
+---
+
+# 56. DESIGN
+
+Premium modern UI.
+
+Use:
+
+- Clean spacing
+- Typography hierarchy
+- Modern cards
+- Professional icons
+- Responsive charts
+- Clear navigation
+- Subtle animations
+
+Never:
+
+- Overlap content
+- Clip text
+- Hide controls
+- Put huge dashboards on one screen
+- Use random icon styles
+- Use fake data
+- Use fake APIs
+- Create unfinished screens
+
+---
+
+# 57. NAVIGATION
+
+Main:
+
+**Home**
+
+**Forecast**
+
+**Map**
+
+**Alerts**
+
+**More**
+
+More:
+
+- AQI
+- Graphs
+- Radar
+- Satellite
+- Astronomy
+- Disasters
+- Earthquakes
+- Floods
+- Wildfires
+- Volcanoes
+- Tsunami
+- Cyclones
+- Marine
+- Aviation
+- Emergency Numbers
+- Useful Numbers
+- Locations
+- Providers
+- Settings
+- About
+
+---
+
+# 58. BUILD WORKFLOW
+
+Follow:
+
+ANALYZE  
+↓  
+FEATURE MATRIX  
+↓  
+ARCHITECTURE  
+↓  
+DESIGN SYSTEM  
+↓  
+IMPLEMENT  
+↓  
+BUILD  
+↓  
+TEST  
+↓  
+RUN  
+↓  
+INSPECT  
+↓  
+FIX  
+↓  
+BUILD AGAIN  
+↓  
+NEXT MODULE
+
+Never implement everything before the first build.
+
+After every major module:
+
+- Compile
+- Test
+- Inspect
+- Fix
+- Continue
+
+---
+
+# 59. TESTING
+
+Test:
+
+- No internet
+- Slow internet
+- API timeout
+- API failure
+- Invalid response
+- Missing weather field
+- GPS denied
+- Notification denied
+- Camera denied
+- File permission denied
+- Location unavailable
+- Empty search
+- Invalid coordinates
+- API key missing
+- Provider unavailable
+- Low RAM
+- High RAM
+- Dark mode
+- Light mode
+- Bengali
+- Japanese
+- Hindi
+- Large text
+- Accessibility
+- Rotation/configuration changes
+- Background restrictions
+
+---
+
+# 60. APK REQUIREMENT
+
+Before claiming completion:
+
+- Gradle sync successful
+- Compilation successful
+- Unit tests successful
+- UI tests where practical
+- No resource errors
+- No dependency errors
+- No manifest errors
+- No unresolved symbols
+- APK generated
+- APK path verified
+
+If build fails:
+
+READ THE EXACT ERROR.
+
+FIX THE ROOT CAUSE.
+
+REBUILD.
+
+Do not simply report the error.
+
+---
+
+# 61. FINAL FEATURE AUDIT
+
+Report:
+
+WEATHER  
+FORECAST  
+GOOGLE WEATHER  
+OPEN-METEO  
+MET NORWAY  
+WEATHERAPI  
+ACCUWEATHER  
+TOMORROW.IO  
+WEATHERBIT  
+INDIA / IMD  
+JAPAN / JMA  
+BANGLADESH / BMD  
+NOAA  
+WEATHER MODELS  
+MODEL COMPARISON  
+AQI  
+AQI GRAPH  
+RAIN GRAPH  
+WEATHER GRAPHS  
+WIND  
+GUST  
+WIND DIRECTION  
+PRESSURE  
+DEW POINT  
+HUMIDITY  
+VISIBILITY  
+CLOUD  
+SNOW  
+THUNDERSTORM  
+LIGHTNING  
+RADAR  
+SATELLITE  
+GOOGLE MAPS  
+CYCLONE  
+FLOOD  
+EARTHQUAKE  
+TSUNAMI  
+WILDFIRE  
+VOLCANO  
+LANDSLIDE  
+MARINE  
+TIDE  
+AVIATION  
+ASTRONOMY  
+SPACE WEATHER  
+EMERGENCY NUMBERS  all over the world with small county flag for which county number 
+USEFUL NUMBERS  
+LIVE NOTIFICATION  
+NOTIFICATION PERMISSION  
+LOCATION  
+CAMERA  
+FILES  
+OFFLINE  
+1 GB RAM MODE  
+REDUCED ANIMATION  
+HIGH PERFORMANCE MODE  
+SPLASH SCREEN  
+MODERN LOGO  
+ICON SYSTEM  
+MULTI-LANGUAGE  
+BENGALI  
+JAPANESE  
+HINDI  
+DARK MODE  
+ACCESSIBILITY  
+SECURITY  
+TESTS  
+APK BUILD
+
+For every item report exactly:
+
+**IMPLEMENTED**
+
+**PARTIALLY IMPLEMENTED**
+
+**NOT AVAILABLE**
+
+**REQUIRES API KEY**
+
+**REQUIRES EXTERNAL CONFIGURATION**
+
+Never claim something is implemented when it is not.
+
+---
+
+# FINAL OBJECTIVE
+
+Build a genuinely premium, native Kotlin Android weather platform supporting Bangladesh, India, Japan, and worldwide locations.
+
+It must combine:
+
+**Weather + Forecast + Google Weather + Google Maps + Radar + Satellite + Rain + Snow + Thunderstorms + Lightning + Wind + Gust + Wind Direction + AQI + Graphs + Astronomy + Cyclones + Floods + Earthquakes + Tsunami + Wildfires + Volcanoes + Marine + Aviation + Emergency Information + Official Alerts + Offline Mode + Live Notification + Low-RAM Optimization + High-End Optimization + Multiple Languages.**
+
+Prioritize:
+
+**Accuracy → Official Sources → Reliability → Transparency → Performance → Accessibility → UI**
+
+Do not fabricate APIs.
+
+Do not fabricate alerts.
+
+Do not fabricate official data.
+
+Do not pretend an unavailable provider is active.
+
+If a service requires an API key, configuration, licensing, or regional access, clearly report it.
+
+Use all relevant **free/open/public APIs and official data sources that are genuinely available**, rather than literally attempting to integrate every API on the internet.
+
+The application must be:
+
+**Functional.  
+Native.  
+Offline-capable.  
+Low-RAM optimized.  
+High-performance optimized.  
+Secure.  
+Accessible.  
+Buildable.  
+Testable.  
+Maintainable.  
+Visually polished.**
+
+DO NOT STOP AT UI MOCKUPS.
+
+DO NOT STOP AT SOURCE CODE.
+
+**BUILD.  
+TEST.  
+FIX.  
+VERIFY.  
+GENERATE THE APK.**

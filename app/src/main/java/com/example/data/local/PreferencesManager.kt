@@ -17,7 +17,10 @@ class PreferencesManager(private val context: Context) {
     private object Keys {
         val LANGUAGE = stringPreferencesKey("language")
         val THEME = stringPreferencesKey("theme")
+        val FONT_STYLE = stringPreferencesKey("font_style")
+        val BACKGROUND_STYLE = stringPreferencesKey("background_style")
         val ANIMATION = stringPreferencesKey("animation")
+        val PERFORMANCE_MODE = stringPreferencesKey("performance_mode")
         val TEMP_UNIT = stringPreferencesKey("temp_unit")
         val WIND_UNIT = stringPreferencesKey("wind_unit")
         val PRESSURE_UNIT = stringPreferencesKey("pressure_unit")
@@ -30,8 +33,10 @@ class PreferencesManager(private val context: Context) {
         val NOTIF_DAILY_MIN = intPreferencesKey("notif_daily_min")
         val NOTIF_RAIN = booleanPreferencesKey("notif_rain")
         val NOTIF_SEVERE = booleanPreferencesKey("notif_severe")
+        val NOTIF_BWOT = booleanPreferencesKey("notif_bwot")
         val NOTIF_AQI = booleanPreferencesKey("notif_aqi")
         val NOTIF_DISASTER = booleanPreferencesKey("notif_disaster")
+        val NOTIF_WORLDWIDE = booleanPreferencesKey("notif_worldwide")
         val NOTIF_MIN_SEV = intPreferencesKey("notif_min_sev")
         val NOTIF_RADIUS = intPreferencesKey("notif_radius")
 
@@ -58,8 +63,11 @@ class PreferencesManager(private val context: Context) {
         .map { p ->
             UserPreferences(
                 language = enumValueOrDefault(p[Keys.LANGUAGE], AppLanguage.ENGLISH),
-                themeAppearance = enumValueOrDefault(p[Keys.THEME], ThemeAppearance.SYSTEM),
+                themeAppearance = enumValueOrDefault(p[Keys.THEME], ThemeAppearance.DYNAMIC_WEATHER),
+                fontStyle = enumValueOrDefault(p[Keys.FONT_STYLE], FontStylePreset.MODERN_GEOMETRIC),
+                backgroundStyle = enumValueOrDefault(p[Keys.BACKGROUND_STYLE], BackgroundStyle.DYNAMIC_SKY),
                 animationLevel = enumValueOrDefault(p[Keys.ANIMATION], AnimationLevel.FULL),
+                performanceMode = enumValueOrDefault(p[Keys.PERFORMANCE_MODE], PerformanceMode.AUTO),
                 temperatureUnit = enumValueOrDefault(p[Keys.TEMP_UNIT], TemperatureUnit.CELSIUS),
                 windUnit = enumValueOrDefault(p[Keys.WIND_UNIT], WindUnit.KMH),
                 pressureUnit = enumValueOrDefault(p[Keys.PRESSURE_UNIT], PressureUnit.HPA),
@@ -72,8 +80,10 @@ class PreferencesManager(private val context: Context) {
                     dailyMinute = p[Keys.NOTIF_DAILY_MIN] ?: 30,
                     rainAlertsEnabled = p[Keys.NOTIF_RAIN] ?: true,
                     severeWeatherEnabled = p[Keys.NOTIF_SEVERE] ?: true,
+                    bwotAlertsEnabled = p[Keys.NOTIF_BWOT] ?: true,
                     aqiAlertsEnabled = p[Keys.NOTIF_AQI] ?: true,
                     disasterAlertsEnabled = p[Keys.NOTIF_DISASTER] ?: true,
+                    worldwideAlertsEnabled = p[Keys.NOTIF_WORLDWIDE] ?: true,
                     minSeverityRank = p[Keys.NOTIF_MIN_SEV] ?: 1,
                     disasterRadiusKm = p[Keys.NOTIF_RADIUS] ?: 500
                 ),
@@ -97,7 +107,10 @@ class PreferencesManager(private val context: Context) {
 
     suspend fun updateLanguage(language: AppLanguage) = edit { it[Keys.LANGUAGE] = language.name }
     suspend fun updateTheme(theme: ThemeAppearance) = edit { it[Keys.THEME] = theme.name }
+    suspend fun updateFontStyle(style: FontStylePreset) = edit { it[Keys.FONT_STYLE] = style.name }
+    suspend fun updateBackgroundStyle(style: BackgroundStyle) = edit { it[Keys.BACKGROUND_STYLE] = style.name }
     suspend fun updateAnimationLevel(level: AnimationLevel) = edit { it[Keys.ANIMATION] = level.name }
+    suspend fun updatePerformanceMode(mode: PerformanceMode) = edit { it[Keys.PERFORMANCE_MODE] = mode.name }
     suspend fun updateTemperatureUnit(unit: TemperatureUnit) = edit { it[Keys.TEMP_UNIT] = unit.name }
     suspend fun updateWindUnit(unit: WindUnit) = edit { it[Keys.WIND_UNIT] = unit.name }
     suspend fun updatePressureUnit(unit: PressureUnit) = edit { it[Keys.PRESSURE_UNIT] = unit.name }
@@ -113,8 +126,10 @@ class PreferencesManager(private val context: Context) {
         it[Keys.NOTIF_DAILY_MIN] = s.dailyMinute
         it[Keys.NOTIF_RAIN] = s.rainAlertsEnabled
         it[Keys.NOTIF_SEVERE] = s.severeWeatherEnabled
+        it[Keys.NOTIF_BWOT] = s.bwotAlertsEnabled
         it[Keys.NOTIF_AQI] = s.aqiAlertsEnabled
         it[Keys.NOTIF_DISASTER] = s.disasterAlertsEnabled
+        it[Keys.NOTIF_WORLDWIDE] = s.worldwideAlertsEnabled
         it[Keys.NOTIF_MIN_SEV] = s.minSeverityRank
         it[Keys.NOTIF_RADIUS] = s.disasterRadiusKm
     }

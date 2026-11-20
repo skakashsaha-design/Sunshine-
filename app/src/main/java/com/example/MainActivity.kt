@@ -67,6 +67,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 SkyPulseTheme(
                     appearance = prefs.themeAppearance,
+                    fontStyle = prefs.fontStyle,
                     isNight = isNight
                 ) {
                     SkyPulseRoot(viewModel = viewModel)

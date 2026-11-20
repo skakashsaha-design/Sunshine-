@@ -139,8 +139,10 @@ class WeatherRepository(
             )
         }
 
-        // Enrich with AQI if available for summary/advisor
-        val aqi = getAirQuality(location, forceRefresh = false).getOrNull()
+        // Enrich with AQI concurrently if available for Today AI Analysis & advisor
+        val aqi = coroutineScope {
+            async { getAirQuality(location, forceRefresh = forceRefresh).getOrNull() }.await()
+        }
         val insights = MeteorologyCalculator.buildInsights(winningSnapshot.current, winningSnapshot.hourly, emptyList())
         val summary = MeteorologyCalculator.generateHumanSummary(
             winningSnapshot.current,
@@ -157,12 +159,23 @@ class WeatherRepository(
         ).toMutableList()
 
         // Optional personal AI advisor enhancement (only if user configured personal key)
+        var aiEnhancedBrief: String? = null
         if (prefs.personalKeys.personalAiEnabled && prefs.personalKeys.personalAiKey.isConfiguredApiKey()) {
             val contextPrompt = "${location.name}: ${summary.joinToString(" ")} AQI: ${aqi?.usAqi ?: "unknown"}"
             personalAiClient.generateOptionalPersonalBrief(prefs.personalKeys, contextPrompt)?.let { aiText ->
+                aiEnhancedBrief = aiText
                 advisor.add(0, "Personal AI Brief: $aiText")
             }
         }
+
+        val todayAnalysis = MeteorologyCalculator.buildTodayAiAnalysis(
+            current = winningSnapshot.current,
+            hourly = winningSnapshot.hourly,
+            daily = winningSnapshot.daily,
+            aqi = aqi,
+            unit = prefs.temperatureUnit,
+            aiEnhancedSummary = aiEnhancedBrief
+        )
 
         val usedFallback = (!prefs.autoProvider && winningSnapshot.providerId != prefs.selectedProvider) ||
             (prefs.autoProvider && fallbackReason != null)
@@ -182,7 +195,8 @@ class WeatherRepository(
             summaryLines = summary,
             dailyAdvisorLines = advisor,
             providerHealthList = healthList,
-            comparisons = emptyList()
+            comparisons = emptyList(),
+            todayAiAnalysis = todayAnalysis
         )
 
         runCatching {
@@ -191,6 +205,19 @@ class WeatherRepository(
         }
 
         Result.success(bundle)
+    }
+
+    fun observeTripPlans(): kotlinx.coroutines.flow.Flow<List<SavedTripPlan>> =
+        kotlinx.coroutines.flow.flow {
+            dao.observeTripPlans().collect { list -> emit(list.map { it.toDomain() }) }
+        }
+
+    suspend fun saveTripPlan(plan: SavedTripPlan) = withContext(Dispatchers.IO) {
+        dao.upsertTripPlan(com.example.data.local.TripPlanEntity.fromDomain(plan))
+    }
+
+    suspend fun deleteTripPlan(id: String) = withContext(Dispatchers.IO) {
+        dao.deleteTripPlan(id)
     }
 
     suspend fun compareAllProviders(

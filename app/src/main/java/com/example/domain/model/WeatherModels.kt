@@ -181,6 +181,89 @@ data class ProviderComparisonEntry(
     val error: String?
 )
 
+data class DayPhaseForecast(
+    val phaseName: String,
+    val timeWindow: String,
+    val tempRangeLabel: String,
+    val conditionLabel: String,
+    val rainRiskPercent: Int,
+    val summary: String
+)
+
+data class ComfortBreakdownItem(
+    val label: String,
+    val score: Int
+)
+
+data class TodayAiAnalysis(
+    val headline: String,
+    val executiveSummary: String,
+    val comfortScore: Int,
+    val comfortBreakdown: List<ComfortBreakdownItem>,
+    val phases: List<DayPhaseForecast>,
+    val keyTriggers: List<String>,
+    val wardrobeAndHealthTips: List<String>,
+    val atmosphericSignals: String,
+    val isAiEnhanced: Boolean = false
+)
+
+enum class TripActivityType(val label: String, val windLimitKmh: Double, val rainLimitMm: Double) {
+    OUTDOOR_EVENT_HOSTING("Outdoor Event / Hosting", 32.0, 1.5),
+    ROAD_TRIP_TRAVEL("Road Trip / Highway", 55.0, 8.0),
+    HIKING_OUTDOOR("Hiking / Nature", 40.0, 2.5),
+    SPORTS_FITNESS("Sports / Cricket / Match", 35.0, 2.0),
+    PHOTOGRAPHY_GOLDEN_HOUR("Photo / Golden Hour", 28.0, 0.5),
+    COMMUTE_FLIGHT("Flight / Transit", 60.0, 10.0)
+}
+
+enum class EventTimeWindow(val label: String, val startHour: Int, val endHour: Int) {
+    FULL_DAY("Full Day (06:00–22:00)", 6, 22),
+    MORNING("Morning (06:00–12:00)", 6, 12),
+    AFTERNOON("Afternoon (12:00–17:00)", 12, 17),
+    EVENING("Evening (17:00–22:00)", 17, 22)
+}
+
+enum class HostVerdict(val badge: String, val summary: String) {
+    IDEAL_GO("FINE TO HOST", "Favorable weather window — great conditions for your event or trip."),
+    FAIR_WITH_BACKUP("GOOD WITH BACKUP", "Generally workable, keep light shelter or flexible timing ready."),
+    CAUTION_PREPARE("CAUTION ADVISED", "Notable weather friction expected — prepare covered backup & safety gear."),
+    HIGH_RISK_RESCHEDULE("MOVE INDOORS / RESCHEDULE", "High weather, AQI, or alert hazard on this date.")
+}
+
+data class TripEvaluation(
+    val locationName: String,
+    val isoDate: String,
+    val activityType: TripActivityType,
+    val timeWindow: EventTimeWindow,
+    val score: Int,
+    val verdict: HostVerdict,
+    val verdictDetail: String,
+    val bestWindowLabel: String,
+    val tempSummary: String,
+    val peakRainProbPercent: Int,
+    val totalRainMm: Double,
+    val peakWindGustKmh: Double,
+    val maxUvIndex: Double?,
+    val aqiEstimate: Int?,
+    val riskFactors: List<String>,
+    val hostChecklist: List<String>,
+    val hourlyWindowSlots: List<HourlyForecast>
+)
+
+data class SavedTripPlan(
+    val id: String,
+    val title: String,
+    val locationName: String,
+    val latitude: Double,
+    val longitude: Double,
+    val isoDate: String,
+    val activityType: TripActivityType,
+    val timeWindow: EventTimeWindow,
+    val lastScore: Int,
+    val lastVerdict: HostVerdict,
+    val createdEpochMs: Long
+)
+
 data class WeatherBundle(
     val location: SavedLocation,
     val activeProvider: ProviderId,
@@ -196,5 +279,6 @@ data class WeatherBundle(
     val summaryLines: List<String>,
     val dailyAdvisorLines: List<String>,
     val providerHealthList: List<ProviderHealth>,
-    val comparisons: List<ProviderComparisonEntry>
+    val comparisons: List<ProviderComparisonEntry>,
+    val todayAiAnalysis: TodayAiAnalysis? = null
 )

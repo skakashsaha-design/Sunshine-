@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.R
+import com.example.ui.components.SkyPulseLogo
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,8 +52,14 @@ fun AboutScreen(onBack: () -> Unit) {
             ) {
                 item {
                     Surface(shape = RoundedCornerShape(20.dp), tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
-                        Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                            Text("SkyPulse Meteorological Platform", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                        Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                SkyPulseLogo(modifier = Modifier.size(46.dp))
+                                Text("SkyPulse Meteorological Platform", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+                            }
                             Text("Developer: ${stringResource(R.string.about_developer_name)} (Bangladesh)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                             Text(stringResource(R.string.about_developer_role), style = MaterialTheme.typography.bodyMedium)
                             Spacer(Modifier.height(4.dp))

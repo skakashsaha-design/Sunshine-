@@ -6,6 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.SkyPulseApp
 import com.example.data.repository.AlertsAndDisastersBundle
 import com.example.domain.calc.AstronomyCalculator
+import com.example.domain.calc.PerformanceHelper
+import com.example.domain.calc.RuntimePerformanceProfile
+import com.example.domain.calc.TripPlannerCalculator
 import com.example.domain.model.*
 import com.example.ui.theme.ThemeAppearance
 import com.example.widget.SkyPulseWidgetUpdater
@@ -53,6 +56,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _comparisonState = MutableStateFlow<UiState<List<ProviderComparisonEntry>>>(UiState.Idle)
     val comparisonState: StateFlow<UiState<List<ProviderComparisonEntry>>> = _comparisonState.asStateFlow()
+
+    private val _modelComparisonState = MutableStateFlow<UiState<ModelComparisonResult>>(UiState.Idle)
+    val modelComparisonState: StateFlow<UiState<ModelComparisonResult>> = _modelComparisonState.asStateFlow()
+
+    private val _marineState = MutableStateFlow<UiState<MarineWeatherData>>(UiState.Idle)
+    val marineState: StateFlow<UiState<MarineWeatherData>> = _marineState.asStateFlow()
+
+    private val _aviationState = MutableStateFlow<UiState<AviationMetarData>>(UiState.Idle)
+    val aviationState: StateFlow<UiState<AviationMetarData>> = _aviationState.asStateFlow()
+
+    private val _spaceWeatherState = MutableStateFlow<UiState<SpaceWeatherData>>(UiState.Idle)
+    val spaceWeatherState: StateFlow<UiState<SpaceWeatherData>> = _spaceWeatherState.asStateFlow()
+
+    val tripPlans: StateFlow<List<SavedTripPlan>> = container.weatherRepository.observeTripPlans()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val runtimePerformance: StateFlow<RuntimePerformanceProfile> = preferences
+        .map { PerformanceHelper.resolveProfile(app, it.performanceMode, it.animationLevel) }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            PerformanceHelper.resolveProfile(app, PerformanceMode.AUTO, AnimationLevel.FULL)
+        )
 
     private val _searchResults = MutableStateFlow<List<SearchLocationResult>>(emptyList())
     val searchResults: StateFlow<List<SearchLocationResult>> = _searchResults.asStateFlow()
@@ -213,6 +239,95 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun loadModelComparison() {
+        val loc = _activeLocation.value ?: return
+        viewModelScope.launch {
+            _modelComparisonState.value = UiState.Loading
+            container.extendedWeatherService.fetchModelComparison(loc.latitude, loc.longitude).fold(
+                onSuccess = { _modelComparisonState.value = UiState.Success(it) },
+                onFailure = { _modelComparisonState.value = UiState.Error(it.message ?: "Model comparison unavailable") }
+            )
+        }
+    }
+
+    fun loadMarineWeather() {
+        val loc = _activeLocation.value ?: return
+        val cur = (_weatherState.value as? UiState.Success)?.data?.current
+        viewModelScope.launch {
+            _marineState.value = UiState.Loading
+            container.extendedWeatherService.fetchMarineWeather(
+                loc.latitude, loc.longitude, cur?.windSpeedKmh, cur?.windGustKmh, cur?.pressureHpa
+            ).fold(
+                onSuccess = { _marineState.value = UiState.Success(it) },
+                onFailure = { _marineState.value = UiState.Error(it.message ?: "Marine data unavailable") }
+            )
+        }
+    }
+
+    fun searchAviationAirport(query: String) {
+        if (query.isBlank()) return
+        viewModelScope.launch {
+            _aviationState.value = UiState.Loading
+            container.extendedWeatherService.fetchAviationWeather(query).fold(
+                onSuccess = { _aviationState.value = UiState.Success(it) },
+                onFailure = { _aviationState.value = UiState.Error(it.message ?: "METAR unavailable") }
+            )
+        }
+    }
+
+    fun loadSpaceWeather() {
+        viewModelScope.launch {
+            _spaceWeatherState.value = UiState.Loading
+            container.extendedWeatherService.fetchSpaceWeather().fold(
+                onSuccess = { _spaceWeatherState.value = UiState.Success(it) },
+                onFailure = { _spaceWeatherState.value = UiState.Error(it.message ?: "Space weather unavailable") }
+            )
+        }
+    }
+
+    fun evaluateTripDay(
+        day: DailyForecast,
+        activityType: TripActivityType,
+        timeWindow: EventTimeWindow
+    ): TripEvaluation? {
+        val bundle = (_weatherState.value as? UiState.Success)?.data ?: return null
+        val aqi = (_aqiState.value as? UiState.Success)?.data
+        val alerts = (_alertsState.value as? UiState.Success)?.data?.alerts.orEmpty()
+        return TripPlannerCalculator.evaluateDay(
+            bundle = bundle,
+            day = day,
+            activityType = activityType,
+            timeWindow = timeWindow,
+            aqi = aqi,
+            alerts = alerts,
+            unit = preferences.value.temperatureUnit
+        )
+    }
+
+    fun saveTripPlan(title: String, evaluation: TripEvaluation) {
+        val loc = _activeLocation.value ?: return
+        val plan = SavedTripPlan(
+            id = "trip_${evaluation.isoDate}_${System.currentTimeMillis()}",
+            title = title.ifBlank { "${evaluation.activityType.label} · ${loc.name}" },
+            locationName = loc.name,
+            latitude = loc.latitude,
+            longitude = loc.longitude,
+            isoDate = evaluation.isoDate,
+            activityType = evaluation.activityType,
+            timeWindow = evaluation.timeWindow,
+            lastScore = evaluation.score,
+            lastVerdict = evaluation.verdict,
+            createdEpochMs = System.currentTimeMillis()
+        )
+        viewModelScope.launch {
+            container.weatherRepository.saveTripPlan(plan)
+        }
+    }
+
+    fun deleteTripPlan(id: String) {
+        viewModelScope.launch { container.weatherRepository.deleteTripPlan(id) }
+    }
+
     fun searchCities(query: String) {
         viewModelScope.launch {
             if (query.isBlank()) {
@@ -329,10 +444,45 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun sendMorningBriefingNow() {
+        val prefs = preferences.value
+        val activeLoc = _activeLocation.value
+        val existingWeather = (_weatherState.value as? UiState.Success)?.data
+        viewModelScope.launch {
+            val gpsLoc = runCatching { container.locationRepository.fetchCurrentGpsLocation() }.getOrNull()
+            val targetLoc = gpsLoc ?: activeLoc ?: return@launch
+            val weather = if (existingWeather != null && existingWeather.location.id == targetLoc.id) {
+                existingWeather
+            } else {
+                container.weatherRepository.getWeather(targetLoc, prefs, forceRefresh = false).getOrNull() ?: existingWeather
+            } ?: return@launch
+
+            val aqi = (_aqiState.value as? UiState.Success)?.data
+                ?: container.weatherRepository.getAirQuality(targetLoc, forceRefresh = false).getOrNull()
+            val astronomy = AstronomyCalculator.calculate(targetLoc.latitude, targetLoc.longitude, targetLoc.timezoneId)
+            val alertsData = (_alertsState.value as? UiState.Success)?.data
+                ?: container.disasterAlertRepository.loadAlertsAndDisasters(targetLoc, weather, prefs.personalKeys.bmdCustomFeedUrl)
+
+            container.notificationHelper.dispatchMorningBriefingNotification(
+                weather = weather,
+                aqi = aqi,
+                astronomy = astronomy,
+                alerts = alertsData.alerts,
+                disasters = alertsData.disasters,
+                prefs = prefs,
+                isCurrentGpsLocation = gpsLoc != null,
+                respectDailyDedupe = false
+            )
+        }
+    }
+
     // Settings mutators
     fun updateLanguage(lang: AppLanguage) { viewModelScope.launch { container.preferencesManager.updateLanguage(lang) } }
     fun updateTheme(theme: ThemeAppearance) { viewModelScope.launch { container.preferencesManager.updateTheme(theme) } }
+    fun updateFontStyle(style: FontStylePreset) { viewModelScope.launch { container.preferencesManager.updateFontStyle(style) } }
+    fun updateBackgroundStyle(style: BackgroundStyle) { viewModelScope.launch { container.preferencesManager.updateBackgroundStyle(style) } }
     fun updateAnimationLevel(level: AnimationLevel) { viewModelScope.launch { container.preferencesManager.updateAnimationLevel(level) } }
+    fun updatePerformanceMode(mode: PerformanceMode) { viewModelScope.launch { container.preferencesManager.updatePerformanceMode(mode) } }
     fun updateTempUnit(unit: TemperatureUnit) { viewModelScope.launch { container.preferencesManager.updateTemperatureUnit(unit) } }
     fun updateWindUnit(unit: WindUnit) { viewModelScope.launch { container.preferencesManager.updateWindUnit(unit) } }
     fun updatePressureUnit(unit: PressureUnit) { viewModelScope.launch { container.preferencesManager.updatePressureUnit(unit) } }
@@ -342,7 +492,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _activeLocation.value?.let { refreshWeatherInternal(it, forceRefresh = true) }
         }
     }
-    fun updateNotificationSettings(s: NotificationSettings) { viewModelScope.launch { container.preferencesManager.updateNotificationSettings(s) } }
+    fun updateNotificationSettings(s: NotificationSettings) {
+        viewModelScope.launch {
+            container.preferencesManager.updateNotificationSettings(s)
+            runCatching {
+                com.example.worker.MorningBriefingWorker.scheduleDaily(
+                    context = app,
+                    enabled = s.enabled && s.dailySummaryEnabled,
+                    hour = s.dailyHour,
+                    minute = s.dailyMinute,
+                    replaceExisting = true
+                )
+            }
+        }
+    }
     fun updatePersonalKeys(keys: PersonalApiKeys) { viewModelScope.launch { container.preferencesManager.updatePersonalKeys(keys) } }
     fun updateWallpaperStaticFallback(staticOnly: Boolean) { viewModelScope.launch { container.preferencesManager.updateWallpaperMode(staticOnly) } }
 }

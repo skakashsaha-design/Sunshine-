@@ -1,0 +1,65 @@
+name: Android Debug & Release APK Workflow
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build, Test & Package APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up Gradle 9.3.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.3.1'
+
+      - name: Configure optional API key secrets for CI
+        run: |
+          cat << 'EOF' > .env
+          GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          WEATHERAPI_KEY=${{ secrets.WEATHERAPI_KEY }}
+          TOMORROW_IO_KEY=${{ secrets.TOMORROW_IO_KEY }}
+          WEATHERBIT_KEY=${{ secrets.WEATHERBIT_KEY }}
+          ACCUWEATHER_KEY=${{ secrets.ACCUWEATHER_KEY }}
+          GOOGLE_MAPS_KEY=${{ secrets.GOOGLE_MAPS_KEY }}
+          GOOGLE_WEATHER_KEY=${{ secrets.GOOGLE_WEATHER_KEY }}
+          NASA_FIRMS_KEY=${{ secrets.NASA_FIRMS_KEY }}
+          EOF
+
+      - name: Run Unit & Robolectric Tests
+        run: gradle :app:testDebugUnitTest --no-daemon
+
+      - name: Assemble Debug APK
+        run: gradle :app:assembleDebug --no-daemon
+
+      - name: Verify Debug APK Output
+        run: ls -lh app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-reports
+          path: app/build/reports/tests/testDebugUnitTest/
+          if-no-files-found: ignore
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: skypulse-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30

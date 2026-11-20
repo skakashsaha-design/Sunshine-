@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.data.repository.AlertsAndDisastersBundle
 import com.example.domain.model.*
+import com.example.notification.disasterCategoryVector
 import com.example.ui.UiState
 import com.example.ui.components.OriginBadge
 import com.example.ui.components.SeverityChip
@@ -101,6 +102,7 @@ fun DisasterCenterScreen(
                             Surface(
                                 shape = RoundedCornerShape(18.dp),
                                 color = if (ts.activeWarning) SeverityExtreme.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                                contentColor = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
                                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -191,7 +193,15 @@ fun DisasterCenterScreen(
                             ) {
                                 Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                                        SeverityChip(ev.severity)
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                imageVector = disasterCategoryVector(ev.category, ev.tsunamiFlag),
+                                                contentDescription = ev.category.label,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            SeverityChip(ev.severity)
+                                        }
                                         OriginBadge(ev.origin)
                                     }
                                     Text(ev.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)

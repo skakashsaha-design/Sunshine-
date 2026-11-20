@@ -1,17 +1,32 @@
 package com.example.data.remote
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.Cache
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
+import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-class NetworkClient {
+class NetworkClient(cacheDir: File? = null) {
+
+    val moshi: Moshi = Moshi.Builder()
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
 
     val httpClient: OkHttpClient = OkHttpClient.Builder()
+        .apply {
+            if (cacheDir != null) {
+                cache(Cache(File(cacheDir, "http_cache"), 10L * 1024L * 1024L))
+            }
+        }
         .connectTimeout(12, TimeUnit.SECONDS)
         .readTimeout(15, TimeUnit.SECONDS)
         .writeTimeout(12, TimeUnit.SECONDS)
@@ -23,6 +38,31 @@ class NetworkClient {
             chain.proceed(req)
         }
         .build()
+
+    fun <T> createRetrofitService(baseUrl: String, serviceClass: Class<T>): T {
+        return Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .client(httpClient)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(serviceClass)
+    }
+
+    val openMeteoWeatherApi: OpenMeteoWeatherApi by lazy {
+        createRetrofitService("https://api.open-meteo.com/", OpenMeteoWeatherApi::class.java)
+    }
+
+    val openMeteoAirQualityApi: OpenMeteoAirQualityApi by lazy {
+        createRetrofitService("https://air-quality-api.open-meteo.com/", OpenMeteoAirQualityApi::class.java)
+    }
+
+    val openMeteoFloodApi: OpenMeteoFloodApi by lazy {
+        createRetrofitService("https://flood-api.open-meteo.com/", OpenMeteoFloodApi::class.java)
+    }
+
+    val openMeteoGeocodingApi: OpenMeteoGeocodingApi by lazy {
+        createRetrofitService("https://geocoding-api.open-meteo.com/", OpenMeteoGeocodingApi::class.java)
+    }
 
     suspend fun getString(url: String, headers: Map<String, String> = emptyMap()): Result<String> =
         withContext(Dispatchers.IO) {

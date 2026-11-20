@@ -10,6 +10,7 @@
     <string name="widget_hourly_label">SkyPulse Hourly Forecast</string>
     <string name="widget_aqi_label">SkyPulse Air Quality</string>
     <string name="widget_alert_label">SkyPulse Weather Alerts</string>
+    <string name="widget_glance_label">SkyPulse Glance Weather</string>
 
     <!-- Bottom Navigation -->
     <string name="nav_home">Home</string>

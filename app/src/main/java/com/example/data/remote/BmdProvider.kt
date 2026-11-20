@@ -7,11 +7,10 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * Bangladesh Meteorological Department (BMD) Integration Adapter.
- * Connects to an authorized BMD JSON/RSS feed if configured, and otherwise provides
- * transparent, strictly-labeled MODEL_FORECAST / APP_CALCULATED Bangladesh-specific
- * warnings (cyclone, storm, heavy rain, heatwave, cold wave, marine/inland) without
- * inventing a fake BMD API.
+ * Bangladesh Meteorological Department (BMD) & BWOT (Bangladesh Weather Observation Team) Companion Adapter.
+ * Connects to an authorized BMD/BWOT JSON feed if configured, and otherwise provides transparent,
+ * strictly-labeled MODEL_ESTIMATE / CALCULATED Bangladesh-specific warnings (cyclone, Kalboishakhi
+ * convective squall, lightning, heavy monsoon rain, heatwave, cold wave, marine/inland).
  */
 class BmdProvider(private val client: NetworkClient) {
 
@@ -33,10 +32,12 @@ class BmdProvider(private val client: NetworkClient) {
                 stationOrRegion = location.name,
                 bulletinOrigin = DataOrigin.CALCULATED,
                 marineWarning = "Not applicable outside Bangladesh maritime & inland zone.",
-                inlandWarning = "Select a Bangladesh location (e.g., Dhaka, Chattogram, Cox's Bazar, Sylhet) for BMD mode.",
+                inlandWarning = "Select a Bangladesh location (e.g., Dhaka, Chattogram, Cox's Bazar, Sylhet) for BMD & BWOT Watch.",
                 alerts = emptyList(),
                 statusNote = "Outside Bangladesh territory",
-                lastCheckedEpochMs = System.currentTimeMillis()
+                lastCheckedEpochMs = System.currentTimeMillis(),
+                bwotWatchSummary = "BWOT Watch focuses on Bangladesh divisions & Bay of Bengal.",
+                bwotSquallRisk = "N/A"
             )
         }
 
@@ -45,7 +46,7 @@ class BmdProvider(private val client: NetworkClient) {
             timeZone = TimeZone.getTimeZone("Asia/Dhaka")
         }.format(Date())
 
-        // Attempt authorized custom BMD JSON feed if configured by user/organization
+        // Attempt authorized custom BMD/BWOT JSON feed if configured by user/organization
         if (customBmdFeedUrl.isNotBlank() && customBmdFeedUrl.startsWith("http")) {
             val res = client.getString(customBmdFeedUrl.trim())
             if (res.isSuccess) {
@@ -56,11 +57,11 @@ class BmdProvider(private val client: NetworkClient) {
             }
         }
 
-        // No unauthenticated public BMD REST API exists -> never invent a fake BMD endpoint.
-        // Instead, derive transparent MODEL_FORECAST & APP_CALCULATED Bangladesh advisories from live meteorological telemetry.
         val alerts = mutableListOf<WeatherAlert>()
         var marineStatus = "Bay of Bengal (Model Estimate): Normal sea state; no cyclone-force wind signature detected."
         var inlandStatus = "Inland River Ports & Divisions ($region): No severe storm threshold exceeded."
+        var bwotSquallRisk = "Low"
+        var bwotSummary = "BWOT Convective Watch ($region): Stable boundary layer; monitor routine monsoon or diurnal showers."
 
         if (weather != null) {
             val cur = weather.current
@@ -70,6 +71,35 @@ class BmdProvider(private val client: NetworkClient) {
             val maxGust = next24.mapNotNull { it.windGustKmh ?: it.windSpeedKmh }.maxOrNull() ?: cur.windSpeedKmh ?: 0.0
             val rain24h = next24.mapNotNull { it.precipitationMm }.sum()
             val hasThunder = next24.any { it.condition == WeatherCondition.THUNDERSTORM }
+            val cape = cur.capeJoulesKg ?: 0.0
+
+            // BWOT Convective / Kalboishakhi & Lightning Analysis
+            when {
+                maxGust >= 89.0 -> {
+                    bwotSquallRisk = "Extreme (Cyclonic)"
+                    bwotSummary = "BWOT Storm Watch: Cyclonic wind field (~${maxGust.toInt()} km/h gusts) near $region."
+                }
+                hasThunder || cape >= 1200.0 || maxGust >= 52.0 -> {
+                    bwotSquallRisk = if (cape >= 1800.0 || maxGust >= 65.0) "High (Kalboishakhi / Squall)" else "Moderate (Convective)"
+                    bwotSummary = "BWOT Kalboishakhi / Convective Watch ($region): CAPE ${cape.toInt()} J/kg, peak gusts ~${maxGust.toInt()} km/h. Elevated lightning & squall risk."
+                    alerts += buildBdAlert(
+                        id = "bwot_squall_${location.id}",
+                        title = "BWOT Convective / Kalboishakhi Watch ($region)",
+                        category = AlertCategory.THUNDERSTORM,
+                        severity = if (maxGust >= 65.0 || cape >= 1800.0) AlertSeverity.SEVERE else AlertSeverity.MODERATE,
+                        origin = DataOrigin.MODEL_ESTIMATE,
+                        nowIso = nowIso,
+                        loc = location,
+                        sourceName = "BWOT & BMD Atmospheric Watch",
+                        authority = "Model-derived BWOT Convective Criteria (verify bmd.gov.bd / BWOT)",
+                        desc = bwotSummary
+                    )
+                }
+                rain24h >= 30.0 -> {
+                    bwotSquallRisk = "Rain / Monsoon Band"
+                    bwotSummary = "BWOT Monsoon Moisture Watch ($region): ~${rain24h.toInt()} mm rainfall modeled over 24h."
+                }
+            }
 
             if (maxGust >= 89.0) {
                 marineStatus = "Bay of Bengal Cyclone-Force Wind Signature (~${maxGust.toInt()} km/h model estimate). Verify official BMD Signal at bmd.gov.bd."
@@ -81,6 +111,8 @@ class BmdProvider(private val client: NetworkClient) {
                     origin = DataOrigin.MODEL_ESTIMATE,
                     nowIso = nowIso,
                     loc = location,
+                    sourceName = "BMD & BWOT Threshold Engine",
+                    authority = "Derived using BMD Maritime Thresholds (verify bmd.gov.bd)",
                     desc = "Forecast gusts reach ${maxGust.toInt()} km/h. Monitor Bangladesh Meteorological Department (bmd.gov.bd) official Maritime Signal."
                 )
             } else if (maxGust >= 52.0 || hasThunder) {
@@ -93,6 +125,8 @@ class BmdProvider(private val client: NetworkClient) {
                     origin = DataOrigin.MODEL_ESTIMATE,
                     nowIso = nowIso,
                     loc = location,
+                    sourceName = "Bangladesh Weather Threshold Engine",
+                    authority = "Derived using BMD Thresholds (verify bmd.gov.bd)",
                     desc = "Convective thunderstorm / squall winds up to ${maxGust.toInt()} km/h modeled over $region."
                 )
             }
@@ -106,6 +140,8 @@ class BmdProvider(private val client: NetworkClient) {
                     origin = DataOrigin.MODEL_ESTIMATE,
                     nowIso = nowIso,
                     loc = location,
+                    sourceName = "BMD & BWOT Rainfall Threshold Engine",
+                    authority = "Derived using BMD Thresholds (>=44mm/24h)",
                     desc = "24-hour accumulated rainfall modeled at ${rain24h.toInt()} mm (BMD heavy rain threshold >= 44 mm)."
                 )
             }
@@ -125,6 +161,8 @@ class BmdProvider(private val client: NetworkClient) {
                     origin = DataOrigin.CALCULATED,
                     nowIso = nowIso,
                     loc = location,
+                    sourceName = "BMD Heatwave Threshold Engine",
+                    authority = "Derived using BMD Heatwave Tiers (>=36°C)",
                     desc = "Peak daytime temperature reaches ${maxTemp.toInt()}°C, matching BMD $tier classification (>=36°C)."
                 )
             }
@@ -143,6 +181,8 @@ class BmdProvider(private val client: NetworkClient) {
                     origin = DataOrigin.CALCULATED,
                     nowIso = nowIso,
                     loc = location,
+                    sourceName = "BMD Cold Wave Threshold Engine",
+                    authority = "Derived using BMD Cold Wave Tiers (<=10°C)",
                     desc = "Minimum temperature drops to ${minTemp.toInt()}°C, matching BMD $tier criteria (<=10°C)."
                 )
             }
@@ -155,9 +195,11 @@ class BmdProvider(private val client: NetworkClient) {
             bulletinOrigin = DataOrigin.MODEL_ESTIMATE,
             marineWarning = marineStatus,
             inlandWarning = inlandStatus,
-            alerts = alerts,
-            statusNote = "BMD public REST API is unavailable; showing transparent Model/App-Calculated BMD-threshold advisories. Connect an authorized BMD JSON feed in Settings for OFFICIAL BMD bulletins.",
-            lastCheckedEpochMs = System.currentTimeMillis()
+            alerts = alerts.distinctBy { it.id },
+            statusNote = "Showing transparent BMD & BWOT Model/Calculated advisories. Connect an authorized BMD/BWOT JSON feed in Settings for official live bulletins.",
+            lastCheckedEpochMs = System.currentTimeMillis(),
+            bwotWatchSummary = bwotSummary,
+            bwotSquallRisk = bwotSquallRisk
         )
     }
 
@@ -170,6 +212,7 @@ class BmdProvider(private val client: NetworkClient) {
         val root = JSONObject(raw)
         val marine = root.optString("marine_warning", "No active marine signal")
         val inland = root.optString("inland_warning", "No active inland river port warning")
+        val bwotSum = root.optString("bwot_summary", "Authorized feed active for $region")
         val arr = root.optJSONArray("alerts")
         val list = mutableListOf<WeatherAlert>()
         if (arr != null) {
@@ -204,8 +247,10 @@ class BmdProvider(private val client: NetworkClient) {
             marineWarning = marine,
             inlandWarning = inland,
             alerts = list,
-            statusNote = "Live authorized BMD feed active",
-            lastCheckedEpochMs = System.currentTimeMillis()
+            statusNote = "Live authorized BMD/BWOT feed active",
+            lastCheckedEpochMs = System.currentTimeMillis(),
+            bwotWatchSummary = bwotSum,
+            bwotSquallRisk = root.optString("squall_risk", "Live Feed")
         )
     }
 
@@ -217,6 +262,8 @@ class BmdProvider(private val client: NetworkClient) {
         origin: DataOrigin,
         nowIso: String,
         loc: SavedLocation,
+        sourceName: String,
+        authority: String,
         desc: String
     ) = WeatherAlert(
         id = id,
@@ -225,8 +272,8 @@ class BmdProvider(private val client: NetworkClient) {
         severity = severity,
         urgency = "Expected",
         certainty = "Likely",
-        sourceName = "Bangladesh Weather Threshold Engine",
-        issuingAuthority = "Derived using BMD Thresholds (verify bmd.gov.bd)",
+        sourceName = sourceName,
+        issuingAuthority = authority,
         origin = origin,
         issueTimeIso = nowIso,
         startTimeIso = nowIso,

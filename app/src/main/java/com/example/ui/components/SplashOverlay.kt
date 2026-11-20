@@ -21,10 +21,10 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun SplashOverlay(animationLevel: AnimationLevel) {
-    var visible by remember { mutableStateOf(animationLevel != AnimationLevel.OFF) }
+    var visible by remember { mutableStateOf(animationLevel != AnimationLevel.OFF && animationLevel != AnimationLevel.MINIMAL) }
     LaunchedEffect(Unit) {
         if (visible) {
-            delay(if (animationLevel == AnimationLevel.REDUCED) 450L else 950L)
+            delay(if (animationLevel == AnimationLevel.REDUCED) 350L else 800L)
             visible = false
         }
     }
@@ -43,12 +43,7 @@ fun SplashOverlay(animationLevel: AnimationLevel) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                AnimatedWeatherIcon(
-                    condition = WeatherCondition.PARTLY_CLOUDY,
-                    isDay = true,
-                    animationLevel = animationLevel,
-                    size = 96.dp
-                )
+                SkyPulseLogo(size = 92.dp)
                 Text(
                     text = "SkyPulse",
                     style = MaterialTheme.typography.headlineLarge,
@@ -56,7 +51,7 @@ fun SplashOverlay(animationLevel: AnimationLevel) {
                     color = Color.White
                 )
                 Text(
-                    text = "Meteorology · Radar · BMD · Disasters",
+                    text = "Meteorology · Radar · BMD · BWOT · Disasters",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFFBAE6FD)
                 )

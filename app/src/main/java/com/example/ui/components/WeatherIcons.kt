@@ -29,6 +29,49 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
+fun SkyPulseLogo(
+    size: Dp = 36.dp,
+    modifier: Modifier = Modifier
+) {
+    Canvas(modifier = modifier.size(size)) {
+        val w = this.size.width
+        val h = this.size.height
+        val cx = w / 2f
+        val cy = h / 2f
+
+        // Deep cobalt sky badge circle
+        drawCircle(
+            color = Color(0xFF0F294A),
+            radius = w * 0.48f,
+            center = Offset(cx, cy)
+        )
+        drawCircle(
+            color = Color(0xFF38BDF8),
+            radius = w * 0.46f,
+            center = Offset(cx, cy),
+            style = Stroke(width = w * 0.045f)
+        )
+        // Radar sweep arc
+        drawArc(
+            color = Color(0xFF34D399),
+            startAngle = -55f,
+            sweepAngle = 95f,
+            useCenter = false,
+            topLeft = Offset(w * 0.14f, h * 0.14f),
+            size = Size(w * 0.72f, h * 0.72f),
+            style = Stroke(width = w * 0.055f, cap = StrokeCap.Round)
+        )
+        // Amber solar core + crisp white cloud
+        drawCircle(
+            color = Color(0xFFFBBF24),
+            radius = w * 0.16f,
+            center = Offset(cx + w * 0.11f, cy - h * 0.12f)
+        )
+        drawCloud(cx - w * 0.04f, cy + h * 0.09f, w * 0.56f, Color.White)
+    }
+}
+
+@Composable
 fun AnimatedWeatherIcon(
     condition: WeatherCondition,
     isDay: Boolean,
@@ -37,7 +80,7 @@ fun AnimatedWeatherIcon(
     modifier: Modifier = Modifier
 ) {
     val infinite = rememberInfiniteTransition(label = "weather_icon")
-    val pulse by if (animationLevel == AnimationLevel.OFF) {
+    val pulse by if (animationLevel == AnimationLevel.OFF || animationLevel == AnimationLevel.MINIMAL) {
         androidx.compose.runtime.remember { androidx.compose.runtime.mutableFloatStateOf(0f) }
     } else {
         infinite.animateFloat(

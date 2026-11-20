@@ -60,12 +60,32 @@ object GeoUtils {
     fun convertTemperature(celsius: Double, unit: TemperatureUnit): Double = when (unit) {
         TemperatureUnit.CELSIUS -> celsius
         TemperatureUnit.FAHRENHEIT -> celsius * 9.0 / 5.0 + 32.0
+        TemperatureUnit.KELVIN -> celsius + 273.15
     }
 
     fun formatTemperature(celsius: Double?, unit: TemperatureUnit, withUnit: Boolean = true): String {
         if (celsius == null) return "N/A"
         val v = convertTemperature(celsius, unit).roundToInt()
-        return if (withUnit) "$v${unit.symbol}" else "$v°"
+        return if (withUnit) "$v${unit.symbol}" else if (unit == TemperatureUnit.KELVIN) "${v}K" else "$v°"
+    }
+
+    fun beaufortScale(kmh: Double?): Pair<Int, String> {
+        if (kmh == null) return 0 to "Unknown"
+        return when {
+            kmh < 1.0 -> 0 to "Calm"
+            kmh < 6.0 -> 1 to "Light Air"
+            kmh < 12.0 -> 2 to "Light Breeze"
+            kmh < 20.0 -> 3 to "Gentle Breeze"
+            kmh < 29.0 -> 4 to "Moderate Breeze"
+            kmh < 39.0 -> 5 to "Fresh Breeze"
+            kmh < 50.0 -> 6 to "Strong Breeze"
+            kmh < 62.0 -> 7 to "Near Gale"
+            kmh < 75.0 -> 8 to "Gale"
+            kmh < 89.0 -> 9 to "Strong Gale"
+            kmh < 103.0 -> 10 to "Storm"
+            kmh < 118.0 -> 11 to "Violent Storm"
+            else -> 12 to "Hurricane Force"
+        }
     }
 
     fun convertWind(kmh: Double, unit: WindUnit): Double = when (unit) {

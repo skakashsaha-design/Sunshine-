@@ -4,19 +4,30 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Outer radar pulse arc -->
+    <!-- Subtle outer radar sweep ring -->
     <path
         android:fillColor="#00000000"
-        android:pathData="M29,48 A25,25 0 0,1 74,34"
-        android:strokeWidth="2.8"
+        android:pathData="M24,54 A30,30 0 1,1 80,68"
+        android:strokeWidth="2.4"
         android:strokeLineCap="round"
-        android:strokeColor="#67E8F9" />
-    <!-- Glowing sun circle -->
+        android:strokeColor="#38BDF8" />
+    <!-- Inner radar pulse arc -->
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M31,45 A23,23 0 0,1 74,36"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:strokeColor="#A5F3FC" />
+    <!-- Radiant sun core -->
     <path
         android:fillColor="#FBBF24"
-        android:pathData="M62,43m-13,0a13,13 0,1 1,26 0a13,13 0,1 1,-26 0" />
-    <!-- Bold foreground cloud silhouette -->
+        android:pathData="M65,41m-12.5,0a12.5,12.5 0,1 1,25 0a12.5,12.5 0,1 1,-25 0" />
+    <!-- Sculpted foreground cloud silhouette -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M34,68 L69,68 C74.5,68 79,63.5 79,58 C79,52.8 75.0,48.5 69.9,48.1 C68.1,41.2 61.8,36 54.3,36 C45.4,36 38.2,43.2 38.2,52.1 C38.2,52.4 38.2,52.7 38.3,53.0 C33.6,53.8 30,57.9 30,62.8 C30,65.7 31.8,68 34,68 Z" />
+        android:pathData="M33,69 L69,69 C74.8,69 79.5,64.3 79.5,58.5 C79.5,53.0 75.3,48.5 69.9,48.0 C68.0,40.8 61.5,35.5 53.7,35.5 C44.5,35.5 37.0,43.0 37.0,52.2 C37.0,52.6 37.0,52.9 37.1,53.3 C32.2,54.2 28.5,58.5 28.5,63.7 C28.5,66.6 30.5,69 33,69 Z" />
+    <!-- Atmospheric pulse lightning/wave accent -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M43,75 L49,75 L47,80 L55,73 L50,73 L52,69 L43,75 Z" />
 </vector>

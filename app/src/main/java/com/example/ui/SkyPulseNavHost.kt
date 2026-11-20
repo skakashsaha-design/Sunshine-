@@ -39,6 +39,13 @@ object Routes {
     const val PROVIDERS = "providers"
     const val SETTINGS = "settings"
     const val ABOUT = "about"
+    const val TRIP_PLANNER = "trip_planner"
+    const val MODELS = "models"
+    const val MARINE = "marine"
+    const val AVIATION = "aviation"
+    const val SPACE_WEATHER = "space_weather"
+    const val EMERGENCY_NUMBERS = "emergency_numbers"
+    const val PERMISSIONS = "permissions"
 }
 
 private data class TopTab(
@@ -60,12 +67,18 @@ private val topTabs = listOf(
 @Composable
 fun SkyPulseRoot(viewModel: MainViewModel) {
     val prefs by viewModel.preferences.collectAsStateWithLifecycle()
+    val runtimePerf by viewModel.runtimePerformance.collectAsStateWithLifecycle()
     val weatherState by viewModel.weatherState.collectAsStateWithLifecycle()
     val aqiState by viewModel.aqiState.collectAsStateWithLifecycle()
     val astronomy by viewModel.astronomyState.collectAsStateWithLifecycle()
     val alertsState by viewModel.alertsState.collectAsStateWithLifecycle()
     val radarTimeline by viewModel.radarTimeline.collectAsStateWithLifecycle()
     val comparisonState by viewModel.comparisonState.collectAsStateWithLifecycle()
+    val modelComparisonState by viewModel.modelComparisonState.collectAsStateWithLifecycle()
+    val marineState by viewModel.marineState.collectAsStateWithLifecycle()
+    val aviationState by viewModel.aviationState.collectAsStateWithLifecycle()
+    val spaceWeatherState by viewModel.spaceWeatherState.collectAsStateWithLifecycle()
+    val tripPlans by viewModel.tripPlans.collectAsStateWithLifecycle()
     val savedLocations by viewModel.savedLocations.collectAsStateWithLifecycle()
     val activeLocation by viewModel.activeLocation.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
@@ -101,8 +114,9 @@ fun SkyPulseRoot(viewModel: MainViewModel) {
         DynamicWeatherBackground(
             condition = bgCondition,
             isDay = bgIsDay,
-            animationLevel = prefs.animationLevel,
-            themeAppearance = prefs.themeAppearance
+            animationLevel = runtimePerf.effectiveAnimation,
+            themeAppearance = prefs.themeAppearance,
+            backgroundStyle = prefs.backgroundStyle
         ) {
             BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
                 val useRail = maxWidth >= 840.dp
@@ -129,6 +143,7 @@ fun SkyPulseRoot(viewModel: MainViewModel) {
                     Scaffold(
                         modifier = Modifier.weight(1f),
                         containerColor = if (currentRoute == Routes.HOME) Color.Transparent else MaterialTheme.colorScheme.background,
+                        contentColor = if (currentRoute == Routes.HOME) LocalContentColor.current else MaterialTheme.colorScheme.onBackground,
                         contentWindowInsets = WindowInsets.safeDrawing,
                         bottomBar = {
                             if (!useRail && showBottomOrRail) {
@@ -187,7 +202,8 @@ fun SkyPulseRoot(viewModel: MainViewModel) {
                                     onSelectAlert = { alert ->
                                         viewModel.selectAlert(alert)
                                         navController.navigate(Routes.ALERT_DETAIL)
-                                    }
+                                    },
+                                    onOpenTripPlanner = { navController.navigate(Routes.TRIP_PLANNER) }
                                 )
                             }
 
@@ -216,7 +232,8 @@ fun SkyPulseRoot(viewModel: MainViewModel) {
                                     onLoadDisasters = { viewModel.loadAlertsAndDisasters() },
                                     onInspectPoint = { lat, lon -> viewModel.inspectMapPoint(lat, lon) },
                                     onSavePoint = { lat, lon -> viewModel.saveMapPointAsLocation(lat, lon) },
-                                    onOpenLocations = { navController.navigate(Routes.LOCATIONS) }
+                                    onOpenLocations = { navController.navigate(Routes.LOCATIONS) },
+                                    lowRamMode = runtimePerf.isLowRamActive
                                 )
                             }
 
@@ -237,16 +254,83 @@ fun SkyPulseRoot(viewModel: MainViewModel) {
                                     prefs = prefs,
                                     isSoundPlaying = isSoundPlaying,
                                     activeSound = activeSound,
+                                    onOpenTripPlanner = { navController.navigate(Routes.TRIP_PLANNER) },
+                                    onOpenModels = { navController.navigate(Routes.MODELS) },
                                     onOpenAqi = { navController.navigate(Routes.AQI) },
                                     onOpenAstronomy = { navController.navigate(Routes.ASTRONOMY) },
+                                    onOpenMarine = { navController.navigate(Routes.MARINE) },
+                                    onOpenAviation = { navController.navigate(Routes.AVIATION) },
+                                    onOpenSpaceWeather = { navController.navigate(Routes.SPACE_WEATHER) },
                                     onOpenDisasters = { navController.navigate(Routes.DISASTERS) },
+                                    onOpenEmergencyNumbers = { navController.navigate(Routes.EMERGENCY_NUMBERS) },
                                     onOpenLocations = { navController.navigate(Routes.LOCATIONS) },
                                     onOpenProviders = { navController.navigate(Routes.PROVIDERS) },
+                                    onOpenPermissions = { navController.navigate(Routes.PERMISSIONS) },
                                     onOpenSettings = { navController.navigate(Routes.SETTINGS) },
                                     onOpenAbout = { navController.navigate(Routes.ABOUT) },
                                     onToggleSound = { viewModel.toggleAmbientSound(it) },
                                     onSendTestNotification = { viewModel.sendQuickViewNotificationNow() }
                                 )
+                            }
+
+                            composable(Routes.TRIP_PLANNER) {
+                                TripPlannerScreen(
+                                    weatherState = weatherState,
+                                    savedPlans = tripPlans,
+                                    prefs = prefs,
+                                    evaluateDay = { day, act, win -> viewModel.evaluateTripDay(day, act, win) },
+                                    onSavePlan = { title, eval -> viewModel.saveTripPlan(title, eval) },
+                                    onDeletePlan = { viewModel.deleteTripPlan(it) },
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+
+                            composable(Routes.MODELS) {
+                                ModelComparisonScreen(
+                                    modelState = modelComparisonState,
+                                    cityName = activeLocation?.name ?: "Location",
+                                    prefs = prefs,
+                                    onRefresh = { viewModel.loadModelComparison() },
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+
+                            composable(Routes.MARINE) {
+                                MarineWeatherScreen(
+                                    marineState = marineState,
+                                    cityName = activeLocation?.name ?: "Location",
+                                    prefs = prefs,
+                                    onRefresh = { viewModel.loadMarineWeather() },
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+
+                            composable(Routes.AVIATION) {
+                                AviationWeatherScreen(
+                                    aviationState = aviationState,
+                                    service = viewModel.container.extendedWeatherService,
+                                    onSearchAirport = { viewModel.searchAviationAirport(it) },
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+
+                            composable(Routes.SPACE_WEATHER) {
+                                SpaceWeatherScreen(
+                                    spaceState = spaceWeatherState,
+                                    onRefresh = { viewModel.loadSpaceWeather() },
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+
+                            composable(Routes.EMERGENCY_NUMBERS) {
+                                EmergencyNumbersScreen(
+                                    activeCountryCode = activeLocation?.countryCode,
+                                    onBack = { navController.popBackStack() }
+                                )
+                            }
+
+                            composable(Routes.PERMISSIONS) {
+                                PermissionManagerScreen(onBack = { navController.popBackStack() })
                             }
 
                             composable(Routes.WEATHER_DETAIL) {
@@ -286,7 +370,7 @@ fun SkyPulseRoot(viewModel: MainViewModel) {
                                 AstronomyScreen(
                                     astronomy = astronomy,
                                     cityName = activeLocation?.name ?: "Location",
-                                    animationLevel = prefs.animationLevel,
+                                    animationLevel = runtimePerf.effectiveAnimation,
                                     onRefresh = { viewModel.refreshAstronomy() },
                                     onBack = { navController.popBackStack() }
                                 )
@@ -334,9 +418,13 @@ fun SkyPulseRoot(viewModel: MainViewModel) {
                             composable(Routes.SETTINGS) {
                                 SettingsScreen(
                                     prefs = prefs,
+                                    runtimePerformance = runtimePerf,
                                     onUpdateLanguage = { viewModel.updateLanguage(it) },
                                     onUpdateTheme = { viewModel.updateTheme(it) },
+                                    onUpdateFontStyle = { viewModel.updateFontStyle(it) },
+                                    onUpdateBackgroundStyle = { viewModel.updateBackgroundStyle(it) },
                                     onUpdateAnimation = { viewModel.updateAnimationLevel(it) },
+                                    onUpdatePerformanceMode = { viewModel.updatePerformanceMode(it) },
                                     onUpdateTempUnit = { viewModel.updateTempUnit(it) },
                                     onUpdateWindUnit = { viewModel.updateWindUnit(it) },
                                     onUpdatePressureUnit = { viewModel.updatePressureUnit(it) },
@@ -347,6 +435,7 @@ fun SkyPulseRoot(viewModel: MainViewModel) {
                                     onUpdateWallpaperStatic = { viewModel.updateWallpaperStaticFallback(it) },
                                     onUpdatePersonalKeys = { viewModel.updatePersonalKeys(it) },
                                     onSendTestNotification = { viewModel.sendQuickViewNotificationNow() },
+                                    onSendMorningBriefing = { viewModel.sendMorningBriefingNow() },
                                     onBack = { navController.popBackStack() }
                                 )
                             }
@@ -360,6 +449,6 @@ fun SkyPulseRoot(viewModel: MainViewModel) {
             }
         }
 
-        SplashOverlay(animationLevel = prefs.animationLevel)
+        SplashOverlay(animationLevel = runtimePerf.effectiveAnimation)
     }
 }

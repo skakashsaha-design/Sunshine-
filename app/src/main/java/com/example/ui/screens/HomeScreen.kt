@@ -3,7 +3,6 @@ package com.example.ui.screens
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,13 +24,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.data.repository.AlertsAndDisastersBundle
-import com.example.domain.calc.AqiCalculator
 import com.example.domain.calc.GeoUtils
 import com.example.domain.model.*
 import com.example.ui.UiState
 import com.example.ui.components.AnimatedWeatherIcon
 import com.example.ui.components.OriginBadge
 import com.example.ui.components.SeverityChip
+import com.example.ui.components.SkyPulseLogo
 import com.example.ui.theme.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -57,15 +56,22 @@ fun HomeScreen(
     onOpenAstronomy: () -> Unit,
     onOpenAlerts: () -> Unit,
     onSelectAlert: (WeatherAlert) -> Unit,
+    onOpenTripPlanner: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var locationMenuOpen by remember { mutableStateOf(false) }
+    var aiAnalysisExpanded by remember { mutableStateOf(false) }
 
     val gpsPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { grants ->
         if (grants.values.any { it }) onRequestGps()
     }
+
+    val headerTint = LocalContentColor.current
+    val cardBg = MaterialTheme.colorScheme.surface.copy(alpha = 0.90f)
+    val cardFg = MaterialTheme.colorScheme.onSurface
+    val cardSubFg = MaterialTheme.colorScheme.onSurfaceVariant
 
     Box(
         modifier = modifier.fillMaxSize(),
@@ -74,11 +80,12 @@ fun HomeScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .widthIn(max = 720.dp),
+                .widthIn(max = 720.dp)
+                .testTag("home_feed_list"),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Top Location & Action Row
+            // Top Location & Action Row (Guaranteed High-Contrast on Sky Backdrop)
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -90,27 +97,25 @@ fun HomeScreen(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(14.dp))
                                 .clickable { locationMenuOpen = true }
-                                .padding(horizontal = 10.dp, vertical = 8.dp)
+                                .padding(horizontal = 8.dp, vertical = 8.dp)
                                 .testTag("home_location_selector"),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.LocationOn,
-                                contentDescription = "Location",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
+                            SkyPulseLogo(size = 28.dp)
                             val flag = GeoUtils.countryCodeToFlagEmoji(activeLocation?.countryCode)
                             Text(
                                 text = listOfNotNull(flag.takeIf { it.isNotBlank() }, activeLocation?.name ?: "Select City").joinToString(" "),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
+                                color = headerTint,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Icon(
                                 imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Switch location"
+                                contentDescription = "Switch location",
+                                tint = headerTint
                             )
                         }
 
@@ -141,7 +146,7 @@ fun HomeScreen(
                         }
                     }
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                         IconButton(
                             onClick = {
                                 gpsPermissionLauncher.launch(
@@ -153,19 +158,19 @@ fun HomeScreen(
                             },
                             modifier = Modifier.testTag("home_gps_button")
                         ) {
-                            Icon(Icons.Default.MyLocation, contentDescription = stringResource(R.string.use_gps))
+                            Icon(Icons.Default.MyLocation, contentDescription = stringResource(R.string.use_gps), tint = headerTint)
                         }
                         IconButton(
                             onClick = onOpenLocations,
                             modifier = Modifier.testTag("home_search_button")
                         ) {
-                            Icon(Icons.Default.Search, contentDescription = "Search locations")
+                            Icon(Icons.Default.Search, contentDescription = "Search locations", tint = headerTint)
                         }
                         IconButton(
                             onClick = onRefresh,
                             modifier = Modifier.testTag("home_refresh_button")
                         ) {
-                            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh))
+                            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh), tint = headerTint)
                         }
                     }
                 }
@@ -174,9 +179,11 @@ fun HomeScreen(
             when (weatherState) {
                 is UiState.Loading, UiState.Idle -> {
                     item {
-                        Card(
+                        Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.85f))
+                            shape = RoundedCornerShape(22.dp),
+                            color = cardBg,
+                            contentColor = cardFg
                         ) {
                             Column(
                                 modifier = Modifier
@@ -186,16 +193,18 @@ fun HomeScreen(
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 CircularProgressIndicator()
-                                Text("Syncing meteorological telemetry...", style = MaterialTheme.typography.bodyMedium)
+                                Text("Syncing meteorological telemetry...", style = MaterialTheme.typography.bodyMedium, color = cardFg)
                             }
                         }
                     }
                 }
                 is UiState.Error -> {
                     item {
-                        Card(
+                        Surface(
                             modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                            shape = RoundedCornerShape(20.dp),
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            contentColor = MaterialTheme.colorScheme.onErrorContainer
                         ) {
                             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Text("Weather Unavailable", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -220,7 +229,11 @@ fun HomeScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 val statusBg = if (bundle.isOfflineCache) SeverityModerate else SeverityLow
-                                Surface(color = statusBg.copy(alpha = 0.2f), shape = RoundedCornerShape(8.dp)) {
+                                Surface(
+                                    color = statusBg.copy(alpha = 0.24f),
+                                    contentColor = statusBg,
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
                                     Text(
                                         text = if (bundle.isOfflineCache) stringResource(R.string.status_offline) else stringResource(R.string.status_online),
                                         color = statusBg,
@@ -232,7 +245,7 @@ fun HomeScreen(
                                 Text(
                                     text = "${bundle.activeProvider.displayName} · ${stringResource(R.string.status_last_updated, timeFmt)}",
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = headerTint.copy(alpha = 0.85f),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -240,14 +253,15 @@ fun HomeScreen(
 
                             if (bundle.usedFallback && bundle.fallbackReason != null) {
                                 Surface(
-                                    color = SeverityModerate.copy(alpha = 0.18f),
+                                    color = cardBg,
+                                    contentColor = SeverityModerate,
                                     shape = RoundedCornerShape(10.dp),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
                                     Text(
                                         text = stringResource(R.string.status_fallback_used, "${bundle.activeProvider.displayName} (${bundle.fallbackReason})"),
                                         style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
+                                        color = cardFg,
                                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                                     )
                                 }
@@ -263,7 +277,8 @@ fun HomeScreen(
                                 .clip(RoundedCornerShape(24.dp))
                                 .clickable(onClick = onOpenDetail)
                                 .testTag("home_hero_card"),
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.86f),
+                            color = cardBg,
+                            contentColor = cardFg,
                             tonalElevation = 3.dp
                         ) {
                             Row(
@@ -281,12 +296,14 @@ fun HomeScreen(
                                     Text(
                                         text = GeoUtils.formatTemperature(cur.temperatureC, prefs.temperatureUnit),
                                         style = MaterialTheme.typography.displayLarge,
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold,
+                                        color = cardFg
                                     )
                                     Text(
                                         text = cur.conditionLabel,
                                         style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.Medium
+                                        fontWeight = FontWeight.Medium,
+                                        color = cardFg
                                     )
                                     Text(
                                         text = stringResource(
@@ -294,7 +311,7 @@ fun HomeScreen(
                                             GeoUtils.formatTemperature(cur.feelsLikeC, prefs.temperatureUnit)
                                         ),
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = cardSubFg
                                     )
                                     if (today != null) {
                                         Text(
@@ -325,8 +342,9 @@ fun HomeScreen(
                         }
                     }
 
-                    // Important Alert Banner (if active alerts exist)
-                    val topAlert = (alertsState as? UiState.Success)?.data?.alerts?.firstOrNull()
+                    // Active Alert / BWOT / Worldwide Banner
+                    val alertsBundle = (alertsState as? UiState.Success)?.data
+                    val topAlert = alertsBundle?.alerts?.firstOrNull()
                     if (topAlert != null) {
                         item {
                             Surface(
@@ -335,7 +353,8 @@ fun HomeScreen(
                                     .clip(RoundedCornerShape(16.dp))
                                     .clickable { onSelectAlert(topAlert) }
                                     .testTag("home_alert_banner"),
-                                color = SeverityExtreme.copy(alpha = 0.16f),
+                                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.92f),
+                                contentColor = MaterialTheme.colorScheme.onErrorContainer,
                                 tonalElevation = 2.dp
                             ) {
                                 Row(
@@ -357,9 +376,8 @@ fun HomeScreen(
                                             overflow = TextOverflow.Ellipsis
                                         )
                                         Text(
-                                            text = topAlert.sourceName,
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            text = "${topAlert.sourceName} · Tap for details",
+                                            style = MaterialTheme.typography.labelMedium
                                         )
                                     }
                                     Icon(Icons.Default.ChevronRight, contentDescription = "Open alert")
@@ -374,7 +392,8 @@ fun HomeScreen(
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(20.dp),
-                                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.86f)
+                                color = cardBg,
+                                contentColor = cardFg
                             ) {
                                 Column(modifier = Modifier.padding(14.dp)) {
                                     Row(
@@ -385,7 +404,8 @@ fun HomeScreen(
                                         Text(
                                             text = stringResource(R.string.hourly_outlook),
                                             style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold
+                                            fontWeight = FontWeight.Bold,
+                                            color = cardFg
                                         )
                                         TextButton(onClick = onOpenForecast) {
                                             Text(stringResource(R.string.view_all))
@@ -400,7 +420,8 @@ fun HomeScreen(
                                                     .width(74.dp)
                                                     .clip(RoundedCornerShape(14.dp))
                                                     .clickable { onSelectHour(hour) },
-                                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+                                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant
                                             ) {
                                                 Column(
                                                     modifier = Modifier.padding(vertical = 10.dp, horizontal = 6.dp),
@@ -409,7 +430,8 @@ fun HomeScreen(
                                                 ) {
                                                     Text(
                                                         text = hour.isoTime.substringAfter("T", "").take(5).ifBlank { "--" },
-                                                        style = MaterialTheme.typography.labelMedium
+                                                        style = MaterialTheme.typography.labelMedium,
+                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                                     )
                                                     AnimatedWeatherIcon(
                                                         condition = hour.condition,
@@ -420,13 +442,14 @@ fun HomeScreen(
                                                     Text(
                                                         text = GeoUtils.formatTemperature(hour.temperatureC, prefs.temperatureUnit, false),
                                                         style = MaterialTheme.typography.titleMedium,
-                                                        fontWeight = FontWeight.Bold
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = cardFg
                                                     )
                                                     val prob = hour.precipitationProbabilityPercent
                                                     Text(
                                                         text = if (prob != null && prob > 0) "$prob%" else "",
                                                         style = MaterialTheme.typography.labelSmall,
-                                                        color = SkyCyan
+                                                        color = MaterialTheme.colorScheme.secondary
                                                     )
                                                 }
                                             }
@@ -437,40 +460,168 @@ fun HomeScreen(
                         }
                     }
 
-                    // Today's Summary & Daily Safety Advisor
+                    // Today AI Analysis Card (Multi-Phase + Comfort Indexes + Action Advice)
                     item {
+                        val ai = bundle.todayAiAnalysis
                         Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp),
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.86f)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(20.dp))
+                                .clickable { aiAnalysisExpanded = !aiAnalysisExpanded }
+                                .testTag("home_today_ai_card"),
+                            color = cardBg,
+                            contentColor = cardFg
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Row(
+                                    modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                        Text(
+                                            text = "Today AI Analysis",
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = cardFg
+                                        )
+                                    }
+                                    Icon(
+                                        if (aiAnalysisExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                        contentDescription = "Expand AI analysis",
+                                        tint = cardSubFg
+                                    )
+                                }
+
+                                if (ai != null) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = ai.headline,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            color = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Surface(
+                                            shape = RoundedCornerShape(10.dp),
+                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                        ) {
+                                            Text(
+                                                text = "Comfort ${ai.comfortScore}/100",
+                                                style = MaterialTheme.typography.labelMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                            )
+                                        }
+                                    }
+                                    Text(text = ai.executiveSummary, style = MaterialTheme.typography.bodyMedium, color = cardFg)
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        ai.comfortBreakdown.take(4).forEach { item ->
+                                            ComfortPill(item.label, item.score, Modifier.weight(1f))
+                                        }
+                                    }
+
+                                    if (aiAnalysisExpanded) {
+                                        HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                        Text("Daypart Breakdown", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                                        ai.phases.forEach { p ->
+                                            Surface(
+                                                shape = RoundedCornerShape(10.dp),
+                                                color = MaterialTheme.colorScheme.surfaceVariant,
+                                                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                Column(Modifier.padding(10.dp)) {
+                                                    Text(
+                                                        "${p.phaseName} (${p.timeWindow}) · ${p.tempRangeLabel} · Rain ${p.rainRiskPercent}%",
+                                                        fontWeight = FontWeight.Bold,
+                                                        style = MaterialTheme.typography.labelLarge
+                                                    )
+                                                    Text(p.summary, style = MaterialTheme.typography.bodyMedium)
+                                                }
+                                            }
+                                        }
+                                        if (ai.keyTriggers.isNotEmpty()) {
+                                            Text("Key Atmospheric Triggers", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                                            ai.keyTriggers.forEach { trigger ->
+                                                Text("• $trigger", style = MaterialTheme.typography.bodyMedium, color = cardFg)
+                                            }
+                                        }
+                                        if (ai.wardrobeAndHealthTips.isNotEmpty()) {
+                                            Text("Wardrobe & Health Plan", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                                            ai.wardrobeAndHealthTips.forEach { tip ->
+                                                Text("✓ $tip", style = MaterialTheme.typography.bodyMedium, color = cardFg)
+                                            }
+                                        }
+                                        Text(
+                                            text = ai.atmosphericSignals,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = cardSubFg
+                                        )
+                                    }
+                                } else {
+                                    bundle.summaryLines.forEach { line ->
+                                        Text(text = "• $line", style = MaterialTheme.typography.bodyMedium, color = cardFg)
+                                    }
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
                                     Text(
-                                        text = stringResource(R.string.todays_summary),
+                                        text = stringResource(R.string.daily_advisor),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                    bundle.dailyAdvisorLines.take(3).forEach { tip ->
+                                        Text(text = "• $tip", style = MaterialTheme.typography.bodyMedium, color = cardFg)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Quick Trip & Event Host Planner Entry Card
+                    item {
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(18.dp))
+                                .clickable(onClick = onOpenTripPlanner)
+                                .testTag("home_trip_planner_card"),
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Icon(Icons.Default.EventAvailable, contentDescription = null)
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        "Trip & Event Host Planner",
                                         style = MaterialTheme.typography.titleMedium,
                                         fontWeight = FontWeight.Bold
                                     )
+                                    Text(
+                                        "Check whether any upcoming date is safe to host an event or travel →",
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
                                 }
-                                bundle.summaryLines.forEach { line ->
-                                    Text(text = "• $line", style = MaterialTheme.typography.bodyMedium)
-                                }
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                                Text(
-                                    text = stringResource(R.string.daily_advisor),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                bundle.dailyAdvisorLines.take(3).forEach { tip ->
-                                    Text(text = "• $tip", style = MaterialTheme.typography.bodyMedium)
-                                }
+                                Icon(Icons.Default.ChevronRight, contentDescription = "Open Trip Planner")
                             }
                         }
                     }
@@ -508,7 +659,7 @@ fun HomeScreen(
                                 HomeMetricTile(
                                     title = stringResource(R.string.wind),
                                     value = GeoUtils.formatWind(cur.windSpeedKmh, prefs.windUnit),
-                                    subtitle = "${GeoUtils.compassDirection(cur.windDirectionDeg)} · Gust ${GeoUtils.formatWind(cur.windGustKmh, prefs.windUnit)}",
+                                    subtitle = "From ${GeoUtils.compassDirection(cur.windDirectionDeg)} · Gust ${GeoUtils.formatWind(cur.windGustKmh, prefs.windUnit)}",
                                     icon = Icons.Default.Explore,
                                     onClick = onOpenDetail,
                                     modifier = Modifier.weight(1f)
@@ -532,7 +683,8 @@ fun HomeScreen(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(18.dp))
                                 .clickable(onClick = onOpenDetail),
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.86f)
+                            color = cardBg,
+                            contentColor = cardFg
                         ) {
                             Row(
                                 modifier = Modifier
@@ -545,20 +697,41 @@ fun HomeScreen(
                                     Text(
                                         text = stringResource(R.string.detailed_metrics),
                                         style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold,
+                                        color = cardFg
                                     )
                                     Text(
                                         text = "UV ${cur.uvIndex?.roundToInt() ?: "N/A"} · RH ${cur.humidityPercent?.let { "$it%" } ?: "N/A"} · ${GeoUtils.formatPressure(cur.pressureHpa, prefs.pressureUnit)} · Comfort ${bundle.insights.outdoorComfortScore}/100",
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = cardSubFg
                                     )
                                 }
-                                Icon(Icons.Default.ChevronRight, contentDescription = "Open full telemetry")
+                                Icon(Icons.Default.ChevronRight, contentDescription = "Open full telemetry", tint = cardSubFg)
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ComfortPill(label: String, score: Int, modifier: Modifier = Modifier) {
+    val pillColor = when {
+        score >= 75 -> SeverityLow
+        score >= 50 -> SeverityModerate
+        else -> SeverityHigh
+    }
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(10.dp),
+        color = pillColor.copy(alpha = 0.16f),
+        contentColor = MaterialTheme.colorScheme.onSurface
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("$score%", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = pillColor)
         }
     }
 }
@@ -573,11 +746,13 @@ private fun HomeMetricTile(
     modifier: Modifier = Modifier,
     accentColor: Color? = null
 ) {
+    val cardFg = MaterialTheme.colorScheme.onSurface
     Surface(
         modifier = modifier
             .clip(RoundedCornerShape(18.dp))
             .clickable(onClick = onClick),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.86f)
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.90f),
+        contentColor = cardFg
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -600,7 +775,7 @@ private fun HomeMetricTile(
                 text = value,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = accentColor ?: MaterialTheme.colorScheme.onSurface
+                color = accentColor ?: cardFg
             )
             Text(
                 text = subtitle,

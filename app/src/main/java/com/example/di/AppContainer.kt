@@ -12,7 +12,7 @@ import com.example.notification.NotificationHelper
 
 class AppContainer(context: Context) {
 
-    val networkClient = NetworkClient()
+    val networkClient = NetworkClient(context.cacheDir)
     val database: SkyPulseDatabase = SkyPulseDatabase.create(context)
     val preferencesManager = PreferencesManager(context)
 
@@ -26,6 +26,7 @@ class AppContainer(context: Context) {
     val bmdProvider = BmdProvider(networkClient)
     val disasterService = DisasterAndAlertService(networkClient)
     val radarService = RadarService(networkClient)
+    val extendedWeatherService = ExtendedWeatherService(networkClient)
     val personalAiClient = PersonalAiAdvisorClient(networkClient)
 
     val weatherRepository = WeatherRepository(

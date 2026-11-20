@@ -17,6 +17,9 @@ import com.example.data.local.NotificationLogEntity
 import com.example.data.local.SkyPulseDao
 import com.example.domain.calc.GeoUtils
 import com.example.domain.model.*
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.math.roundToInt
 
 class NotificationHelper(
@@ -29,17 +32,21 @@ class NotificationHelper(
         const val CHANNEL_RAIN = "skypulse_rain"
         const val CHANNEL_AQI = "skypulse_aqi"
         const val CHANNEL_DISASTER = "skypulse_disaster"
+        const val CHANNEL_WORLDWIDE = "skypulse_worldwide"
     }
 
     fun ensureChannels() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val mgr = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val channels = listOf(
-            NotificationChannel(CHANNEL_DAILY, context.getString(R.string.channel_daily_name), NotificationManager.IMPORTANCE_DEFAULT),
+            NotificationChannel(CHANNEL_DAILY, context.getString(R.string.channel_daily_name), NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = "Scheduled daily morning weather briefing for your current location"
+            },
             NotificationChannel(CHANNEL_ALERTS, context.getString(R.string.channel_alerts_name), NotificationManager.IMPORTANCE_HIGH),
             NotificationChannel(CHANNEL_RAIN, context.getString(R.string.channel_rain_name), NotificationManager.IMPORTANCE_DEFAULT),
             NotificationChannel(CHANNEL_AQI, context.getString(R.string.channel_aqi_name), NotificationManager.IMPORTANCE_DEFAULT),
-            NotificationChannel(CHANNEL_DISASTER, context.getString(R.string.channel_disaster_name), NotificationManager.IMPORTANCE_HIGH)
+            NotificationChannel(CHANNEL_DISASTER, context.getString(R.string.channel_disaster_name), NotificationManager.IMPORTANCE_HIGH),
+            NotificationChannel(CHANNEL_WORLDWIDE, "Worldwide Hazards & BWOT Alerts", NotificationManager.IMPORTANCE_HIGH)
         )
         mgr.createNotificationChannels(channels)
     }
@@ -48,6 +55,51 @@ class NotificationHelper(
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
         } else true
+    }
+
+    suspend fun dispatchMorningBriefingNotification(
+        weather: WeatherBundle,
+        aqi: AirQualityData?,
+        astronomy: AstronomySnapshot?,
+        alerts: List<WeatherAlert>,
+        disasters: List<DisasterEvent>,
+        prefs: UserPreferences,
+        isCurrentGpsLocation: Boolean,
+        respectDailyDedupe: Boolean = true
+    ): Boolean {
+        if (!prefs.notificationSettings.enabled || !hasNotificationPermission()) return false
+        if (respectDailyDedupe && !prefs.notificationSettings.dailySummaryEnabled) return false
+        ensureChannels()
+
+        val now = System.currentTimeMillis()
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(now))
+        val dedupeKey = "morning_briefing_${weather.location.id}_$todayDate"
+        if (respectDailyDedupe && wasRecentlySent(dedupeKey, now, 18 * 60 * 60 * 1000L)) {
+            return false
+        }
+
+        val briefing = MorningBriefingBuilder.build(
+            weather = weather,
+            aqi = aqi,
+            astronomy = astronomy,
+            alerts = alerts,
+            disasters = disasters,
+            prefs = prefs,
+            isCurrentGpsLocation = isCurrentGpsLocation
+        )
+
+        postNotification(
+            id = 1002,
+            channelId = CHANNEL_DAILY,
+            title = briefing.title,
+            body = briefing.compactSummary,
+            bigText = briefing.fullBriefingText,
+            iconSpec = briefing.iconSpec
+        )
+        if (respectDailyDedupe) {
+            dao.markNotificationSent(NotificationLogEntity(dedupeKey, now))
+        }
+        return true
     }
 
     suspend fun dispatchQuickViewNotification(
@@ -76,7 +128,8 @@ class NotificationHelper(
             channelId = CHANNEL_DAILY,
             title = title,
             body = body,
-            bigText = "$body\n${weather.dailyAdvisorLines.firstOrNull().orEmpty()}"
+            bigText = "$body\n${weather.todayAiAnalysis?.executiveSummary ?: weather.dailyAdvisorLines.firstOrNull().orEmpty()}",
+            iconSpec = NotificationIconResolver.forWeatherCondition(weather.current.condition)
         )
     }
 
@@ -94,18 +147,26 @@ class NotificationHelper(
         val dedupeWindowMs = 6 * 60 * 60 * 1000L
 
         if (settings.severeWeatherEnabled) {
-            alerts.filter { it.severity.rank >= settings.minSeverityRank }.take(2).forEach { alert ->
-                if (!wasRecentlySent("alert_${alert.id}", now, dedupeWindowMs)) {
-                    postNotification(
-                        id = alert.id.hashCode(),
-                        channelId = CHANNEL_ALERTS,
-                        title = "${alert.severity.label}: ${alert.title}",
-                        body = "${alert.sourceName} · ${alert.affectedArea}",
-                        bigText = alert.description
-                    )
-                    dao.markNotificationSent(NotificationLogEntity("alert_${alert.id}", now))
+            alerts
+                .filter { alert ->
+                    val isBwotOrBd = alert.id.startsWith("bwot_") || alert.id.startsWith("bd_")
+                    (alert.severity.rank >= settings.minSeverityRank) &&
+                        (!isBwotOrBd || settings.bwotAlertsEnabled)
                 }
-            }
+                .take(3)
+                .forEach { alert ->
+                    if (!wasRecentlySent("alert_${alert.id}", now, dedupeWindowMs)) {
+                        postNotification(
+                            id = alert.id.hashCode(),
+                            channelId = CHANNEL_ALERTS,
+                            title = "${alert.severity.label}: ${alert.title}",
+                            body = "${alert.sourceName} · ${alert.affectedArea}",
+                            bigText = alert.description,
+                            iconSpec = NotificationIconResolver.forAlertCategory(alert.category, alert.severity)
+                        )
+                        dao.markNotificationSent(NotificationLogEntity("alert_${alert.id}", now))
+                    }
+                }
         }
 
         if (settings.rainAlertsEnabled) {
@@ -115,13 +176,18 @@ class NotificationHelper(
             if (imminent != null) {
                 val key = "rain_${weather.location.id}_${imminent.isoTime.take(13)}"
                 if (!wasRecentlySent(key, now, dedupeWindowMs)) {
-                    val label = if (imminent.condition == WeatherCondition.THUNDERSTORM) "Thunderstorm" else "Rain"
+                    val isThunder = imminent.condition == WeatherCondition.THUNDERSTORM
+                    val label = if (isThunder) "Thunderstorm" else "Rain"
+                    val spec = NotificationIconResolver.forWeatherCondition(
+                        if (isThunder) WeatherCondition.THUNDERSTORM else WeatherCondition.RAIN
+                    )
                     postNotification(
                         id = key.hashCode(),
                         channelId = CHANNEL_RAIN,
                         title = "$label approaching ${weather.location.name}",
                         body = "${imminent.precipitationProbabilityPercent ?: 70}% chance at ${imminent.isoTime.substringAfter("T", "").take(5)} · ${GeoUtils.formatTemperature(imminent.temperatureC, unit)}",
-                        bigText = null
+                        bigText = null,
+                        iconSpec = spec
                     )
                     dao.markNotificationSent(NotificationLogEntity(key, now))
                 }
@@ -130,13 +196,15 @@ class NotificationHelper(
 
         if (settings.aqiAlertsEnabled && (aqi?.usAqi ?: 0) >= 151) {
             val key = "aqi_${weather.location.id}"
+            val usAqi = aqi?.usAqi ?: 151
             if (!wasRecentlySent(key, now, dedupeWindowMs)) {
                 postNotification(
                     id = key.hashCode(),
                     channelId = CHANNEL_AQI,
-                    title = "Unhealthy Air Quality in ${weather.location.name} (AQI ${aqi?.usAqi})",
+                    title = "Unhealthy Air Quality in ${weather.location.name} (AQI $usAqi)",
                     body = aqi?.healthGuidance ?: "Wear a mask outdoors.",
-                    bigText = null
+                    bigText = null,
+                    iconSpec = NotificationIconResolver.forAqi(usAqi)
                 )
                 dao.markNotificationSent(NotificationLogEntity(key, now))
             }
@@ -155,7 +223,32 @@ class NotificationHelper(
                         channelId = CHANNEL_DISASTER,
                         title = "${nearby.category.label}: ${nearby.title}",
                         body = "${nearby.distanceKm?.roundToInt()} km away · Source: ${nearby.source}",
-                        bigText = "${nearby.affectedRegion} · ${nearby.status}"
+                        bigText = "${nearby.affectedRegion} · ${nearby.status}",
+                        iconSpec = NotificationIconResolver.forDisasterCategory(nearby.category, nearby.tsunamiFlag)
+                    )
+                    dao.markNotificationSent(NotificationLogEntity(key, now))
+                }
+            }
+        }
+
+        // Worldwide Alerts Notification (major global earthquakes, tsunamis, GDACS red/orange cyclones/floods, NASA EONET)
+        if (settings.worldwideAlertsEnabled) {
+            val globalCritical = disasters
+                .filter { ev ->
+                    ev.severity.rank >= AlertSeverity.SEVERE.rank || ev.tsunamiFlag
+                }
+                .take(2)
+            globalCritical.forEach { ev ->
+                val key = "worldwide_${ev.id}"
+                if (!wasRecentlySent(key, now, dedupeWindowMs * 2)) {
+                    val distLabel = ev.distanceKm?.let { " · ${it.roundToInt()} km from you" } ?: ""
+                    postNotification(
+                        id = key.hashCode(),
+                        channelId = CHANNEL_WORLDWIDE,
+                        title = "Worldwide Alert: ${ev.title}",
+                        body = "${ev.source} · ${ev.status}$distLabel",
+                        bigText = "${ev.category.label} in ${ev.locationName} (${ev.eventTimeIso}). Source: ${ev.source}",
+                        iconSpec = NotificationIconResolver.forDisasterCategory(ev.category, ev.tsunamiFlag)
                     )
                     dao.markNotificationSent(NotificationLogEntity(key, now))
                 }
@@ -173,7 +266,8 @@ class NotificationHelper(
         channelId: String,
         title: String,
         body: String,
-        bigText: String?
+        bigText: String?,
+        iconSpec: NotificationIconSpec
     ) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -184,17 +278,22 @@ class NotificationHelper(
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        val badgeBitmap = NotificationIconResolver.createLargeBadgeBitmap(context, iconSpec)
         val builder = NotificationCompat.Builder(context, channelId)
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(iconSpec.smallIconRes)
+            .setColor(iconSpec.accentColorArgb)
             .setContentTitle(title)
             .setContentText(body)
             .setContentIntent(pi)
             .setAutoCancel(true)
             .setPriority(
-                if (channelId == CHANNEL_ALERTS || channelId == CHANNEL_DISASTER) {
+                if (channelId == CHANNEL_ALERTS || channelId == CHANNEL_DISASTER || channelId == CHANNEL_WORLDWIDE) {
                     NotificationCompat.PRIORITY_HIGH
                 } else NotificationCompat.PRIORITY_DEFAULT
             )
+        if (badgeBitmap != null) {
+            builder.setLargeIcon(badgeBitmap)
+        }
         if (!bigText.isNullOrBlank()) {
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
         }
