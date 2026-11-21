@@ -73,9 +73,25 @@ object AstronomyCalculator {
 
         val moonData = calculateMoon(latitude, longitude, tz, epochMs)
 
+        val constellations = listOf(
+            StarConstellationInfo("Orion the Hunter", "21:00 – 04:00", "East to South", "Prominent winter constellation featuring Betelgeuse and Rigel."),
+            StarConstellationInfo("Ursa Major (Big Dipper)", "All Night (Circumpolar)", "North", "Reliable navigational asterism pointing to Polaris."),
+            StarConstellationInfo("Sirius (Alpha Canis Majoris)", "22:00 – 05:00", "Southeast", "Brightest star in the night sky in Canis Major."),
+            StarConstellationInfo("Cassiopeia", "All Night", "Northeast", "Distinctive W-shaped northern constellation.")
+        )
+
+        val events = listOf(
+            AstronomyEventInfo("Geminids Meteor Shower Peak", "Dec 13–14", "Up to 120 multicolored meteors per hour under dark skies."),
+            AstronomyEventInfo("Winter Solstice", "Dec 21", "Shortest daylight period of the year in the Northern Hemisphere."),
+            AstronomyEventInfo("Quadrantids Meteor Shower", "Jan 3–4", "Active meteor shower with sharp peak rate."),
+            AstronomyEventInfo("Spring Equinox", "Mar 20", "Equal duration of day and night worldwide.")
+        )
+
         return AstronomySnapshot(
             sun = sunData,
             moon = moonData,
+            constellations = constellations,
+            events = events,
             calculatedAtEpochMs = epochMs,
             origin = DataOrigin.CALCULATED
         )

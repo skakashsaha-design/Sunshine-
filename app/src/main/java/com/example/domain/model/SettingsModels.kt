@@ -18,6 +18,23 @@ enum class FontStylePreset(val label: String, val description: String) {
     TELEMETRY_MONO("Telemetry Mono", "JetBrains Mono Focus")
 }
 
+enum class IconPackPreset(val label: String, val description: String) {
+    MATERIAL_M3("Material M3", "Modern filled & outlined standard"),
+    CLASSIC_OUTLINE("Classic Outline", "Sharp meteorological line art"),
+    NEON_GLOW("Neon Vibrant", "High-contrast colorful glow"),
+    MINIMAL_MONO("Monochrome", "Clean sleek minimal")
+}
+
+enum class AiProviderType(val label: String, val defaultEndpoint: String, val defaultModel: String) {
+    CHATGPT("ChatGPT (OpenAI)", "https://api.openai.com/v1/chat/completions", "gpt-4o-mini"),
+    GEMINI("Google Gemini", "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", "gemini-2.5-flash"),
+    OPENROUTER("OpenRouter", "https://openrouter.ai/api/v1/chat/completions", "openai/gpt-4o-mini"),
+    GROQ("Groq", "https://api.groq.com/openai/v1/chat/completions", "llama-3.3-70b-versatile"),
+    CLAUDE("Claude (Anthropic)", "https://api.anthropic.com/v1/messages", "claude-3-5-sonnet-20241022"),
+    DEEPSEEK("DeepSeek", "https://api.deepseek.com/v1/chat/completions", "deepseek-chat"),
+    CUSTOM("Custom Endpoint", "", "")
+}
+
 enum class BackgroundStyle(val label: String) {
     DYNAMIC_SKY("Dynamic Weather Sky"),
     AURORA_GLOW("Aurora Horizon"),
@@ -90,6 +107,7 @@ data class PersonalApiKeys(
     val weatherbitKey: String = "",
     val googleWeatherKey: String = "",
     val personalAiEnabled: Boolean = false,
+    val aiProvider: AiProviderType = AiProviderType.CHATGPT,
     val personalAiEndpoint: String = "",
     val personalAiKey: String = "",
     val bmdCustomFeedUrl: String = ""
@@ -112,5 +130,6 @@ data class UserPreferences(
     val ambientVolume: Float = 0.45f,
     val ambientAutoStopMinutes: Int = 30,
     val liveWallpaperStaticFallback: Boolean = false,
+    val iconPack: IconPackPreset = IconPackPreset.MATERIAL_M3,
     val personalKeys: PersonalApiKeys = PersonalApiKeys()
 )

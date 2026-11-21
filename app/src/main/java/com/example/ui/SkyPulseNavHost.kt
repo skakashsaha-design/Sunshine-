@@ -433,6 +433,7 @@ fun SkyPulseRoot(viewModel: MainViewModel) {
                                     onUpdateAmbientVolume = { viewModel.setAmbientVolume(it) },
                                     onUpdateAmbientTimer = { viewModel.setAmbientAutoStop(it) },
                                     onUpdateWallpaperStatic = { viewModel.updateWallpaperStaticFallback(it) },
+                                    onUpdateIconPack = { viewModel.updateIconPack(it) },
                                     onUpdatePersonalKeys = { viewModel.updatePersonalKeys(it) },
                                     onSendTestNotification = { viewModel.sendQuickViewNotificationNow() },
                                     onSendMorningBriefing = { viewModel.sendMorningBriefingNow() },

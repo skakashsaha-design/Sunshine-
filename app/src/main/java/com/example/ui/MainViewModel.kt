@@ -508,4 +508,5 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
     fun updatePersonalKeys(keys: PersonalApiKeys) { viewModelScope.launch { container.preferencesManager.updatePersonalKeys(keys) } }
     fun updateWallpaperStaticFallback(staticOnly: Boolean) { viewModelScope.launch { container.preferencesManager.updateWallpaperMode(staticOnly) } }
+    fun updateIconPack(pack: IconPackPreset) { viewModelScope.launch { container.preferencesManager.updateIconPack(pack) } }
 }

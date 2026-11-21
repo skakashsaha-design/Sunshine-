@@ -243,6 +243,48 @@ fun AstronomyScreen(
                         }
                     }
                 }
+
+                // STAR DATA & CONSTELLATIONS CARD
+                item {
+                    Surface(shape = RoundedCornerShape(22.dp), tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text("Star Data & Visible Constellations", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            astronomy.constellations.forEach { c ->
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Text(c.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                                        Text(c.direction, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                                    }
+                                    Text("Visibility: ${c.bestVisibility} · ${c.description}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                if (c != astronomy.constellations.last()) {
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ASTRONOMY EVENTS CARD
+                item {
+                    Surface(shape = RoundedCornerShape(22.dp), tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
+                        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Text("Upcoming Astronomy Events", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            astronomy.events.forEach { ev ->
+                                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                        Text(ev.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+                                        Text(ev.dateStr, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                                    }
+                                    Text(ev.description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                if (ev != astronomy.events.last()) {
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

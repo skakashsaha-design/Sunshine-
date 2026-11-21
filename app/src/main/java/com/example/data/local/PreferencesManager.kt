@@ -44,6 +44,7 @@ class PreferencesManager(private val context: Context) {
         val AMBIENT_VOLUME = floatPreferencesKey("ambient_volume")
         val AMBIENT_TIMER = intPreferencesKey("ambient_timer")
         val WALLPAPER_STATIC = booleanPreferencesKey("wallpaper_static")
+        val ICON_PACK = stringPreferencesKey("icon_pack")
 
         val KEY_WEATHERAPI = stringPreferencesKey("key_weatherapi")
         val KEY_ACCUWEATHER = stringPreferencesKey("key_accuweather")
@@ -51,6 +52,7 @@ class PreferencesManager(private val context: Context) {
         val KEY_WEATHERBIT = stringPreferencesKey("key_weatherbit")
         val KEY_GOOGLE_WEATHER = stringPreferencesKey("key_google_weather")
         val AI_ENABLED = booleanPreferencesKey("ai_enabled")
+        val AI_PROVIDER = stringPreferencesKey("ai_provider")
         val AI_ENDPOINT = stringPreferencesKey("ai_endpoint")
         val AI_KEY = stringPreferencesKey("ai_key")
         val BMD_FEED_URL = stringPreferencesKey("bmd_feed_url")
@@ -91,6 +93,7 @@ class PreferencesManager(private val context: Context) {
                 ambientVolume = p[Keys.AMBIENT_VOLUME] ?: 0.45f,
                 ambientAutoStopMinutes = p[Keys.AMBIENT_TIMER] ?: 30,
                 liveWallpaperStaticFallback = p[Keys.WALLPAPER_STATIC] ?: false,
+                iconPack = enumValueOrDefault(p[Keys.ICON_PACK], IconPackPreset.MATERIAL_M3),
                 personalKeys = PersonalApiKeys(
                     weatherApiKey = p[Keys.KEY_WEATHERAPI] ?: "",
                     accuWeatherKey = p[Keys.KEY_ACCUWEATHER] ?: "",
@@ -98,6 +101,7 @@ class PreferencesManager(private val context: Context) {
                     weatherbitKey = p[Keys.KEY_WEATHERBIT] ?: "",
                     googleWeatherKey = p[Keys.KEY_GOOGLE_WEATHER] ?: "",
                     personalAiEnabled = p[Keys.AI_ENABLED] ?: false,
+                    aiProvider = enumValueOrDefault(p[Keys.AI_PROVIDER], AiProviderType.CHATGPT),
                     personalAiEndpoint = p[Keys.AI_ENDPOINT] ?: "",
                     personalAiKey = p[Keys.AI_KEY] ?: "",
                     bmdCustomFeedUrl = p[Keys.BMD_FEED_URL] ?: ""
@@ -144,6 +148,10 @@ class PreferencesManager(private val context: Context) {
         it[Keys.WALLPAPER_STATIC] = staticFallback
     }
 
+    suspend fun updateIconPack(pack: IconPackPreset) = edit {
+        it[Keys.ICON_PACK] = pack.name
+    }
+
     suspend fun updatePersonalKeys(keys: PersonalApiKeys) = edit {
         it[Keys.KEY_WEATHERAPI] = keys.weatherApiKey
         it[Keys.KEY_ACCUWEATHER] = keys.accuWeatherKey
@@ -151,6 +159,7 @@ class PreferencesManager(private val context: Context) {
         it[Keys.KEY_WEATHERBIT] = keys.weatherbitKey
         it[Keys.KEY_GOOGLE_WEATHER] = keys.googleWeatherKey
         it[Keys.AI_ENABLED] = keys.personalAiEnabled
+        it[Keys.AI_PROVIDER] = keys.aiProvider.name
         it[Keys.AI_ENDPOINT] = keys.personalAiEndpoint
         it[Keys.AI_KEY] = keys.personalAiKey
         it[Keys.BMD_FEED_URL] = keys.bmdCustomFeedUrl

@@ -27,6 +27,5 @@ fun String?.isConfiguredApiKey(): Boolean {
     if (this.isNullOrBlank()) return false
     val trimmed = this.trim()
     return !trimmed.startsWith("YOUR_", ignoreCase = true) &&
-        !trimmed.startsWith("MY_", ignoreCase = true) &&
-        trimmed.length >= 6
+        !trimmed.startsWith("MY_", ignoreCase = true)
 }

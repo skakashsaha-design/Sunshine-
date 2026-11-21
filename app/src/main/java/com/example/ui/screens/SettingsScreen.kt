@@ -41,6 +41,7 @@ fun SettingsScreen(
     onUpdateAmbientVolume: (Float) -> Unit,
     onUpdateAmbientTimer: (Int) -> Unit,
     onUpdateWallpaperStatic: (Boolean) -> Unit,
+    onUpdateIconPack: (IconPackPreset) -> Unit,
     onUpdatePersonalKeys: (PersonalApiKeys) -> Unit,
     onSendTestNotification: () -> Unit,
     onSendMorningBriefing: () -> Unit,
@@ -116,6 +117,14 @@ fun SettingsScreen(
                             selected = prefs.backgroundStyle,
                             labelFor = { it.label },
                             onSelect = onUpdateBackgroundStyle
+                        )
+                        Spacer(Modifier.height(6.dp))
+                        Text("Weather Icon Pack Style", style = MaterialTheme.typography.labelLarge)
+                        FlowChipGroup(
+                            items = IconPackPreset.entries,
+                            selected = prefs.iconPack,
+                            labelFor = { it.label },
+                            onSelect = onUpdateIconPack
                         )
                     }
                 }
@@ -279,7 +288,7 @@ fun SettingsScreen(
                 item {
                     SettingsSection("Optional API Add-ons & Personal AI") {
                         Text(
-                            "No API key is required for core weather, AQI, radar, astronomy, or built-in Today AI Analysis. Enter optional personal keys below only if desired.",
+                            "No API key is required for core weather, AQI, radar, astronomy, or Today AI Analysis. Enter optional personal AI or provider keys below — any non-blank string is accepted immediately for your personal account.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -287,17 +296,25 @@ fun SettingsScreen(
                             keysDraft = keysDraft.copy(personalAiEnabled = it)
                         }
                         if (keysDraft.personalAiEnabled) {
+                            Text("Select AI Provider", style = MaterialTheme.typography.labelLarge)
+                            FlowChipGroup(
+                                items = AiProviderType.entries,
+                                selected = keysDraft.aiProvider,
+                                labelFor = { it.label },
+                                onSelect = { keysDraft = keysDraft.copy(aiProvider = it, personalAiEndpoint = if (it == AiProviderType.CUSTOM) keysDraft.personalAiEndpoint else it.defaultEndpoint) }
+                            )
+                            Spacer(Modifier.height(6.dp))
                             OutlinedTextField(
-                                value = keysDraft.personalAiEndpoint,
+                                value = keysDraft.personalAiEndpoint.ifBlank { keysDraft.aiProvider.defaultEndpoint },
                                 onValueChange = { keysDraft = keysDraft.copy(personalAiEndpoint = it) },
-                                label = { Text("Personal AI Endpoint URL (optional)") },
+                                label = { Text("AI Endpoint URL (${keysDraft.aiProvider.defaultModel})") },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )
                             OutlinedTextField(
                                 value = keysDraft.personalAiKey,
                                 onValueChange = { keysDraft = keysDraft.copy(personalAiKey = it) },
-                                label = { Text("Personal AI API Key (optional)") },
+                                label = { Text("AI API Key (${keysDraft.aiProvider.label})") },
                                 singleLine = true,
                                 modifier = Modifier.fillMaxWidth()
                             )

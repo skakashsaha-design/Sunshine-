@@ -45,9 +45,24 @@ data class MoonData(
     val nextNewMoonDate: String
 )
 
+data class StarConstellationInfo(
+    val name: String,
+    val bestVisibility: String,
+    val direction: String,
+    val description: String
+)
+
+data class AstronomyEventInfo(
+    val title: String,
+    val dateStr: String,
+    val description: String
+)
+
 data class AstronomySnapshot(
     val sun: SunData,
     val moon: MoonData,
+    val constellations: List<StarConstellationInfo>,
+    val events: List<AstronomyEventInfo>,
     val calculatedAtEpochMs: Long,
     val origin: DataOrigin = DataOrigin.CALCULATED
 )
